@@ -1,27 +1,67 @@
-# Zabbix Templates
+# Zabbix Templates — SNMP Network, Printer and Infrastructure Monitoring
 
-Community-maintained Zabbix monitoring templates by **Kernovix**.
+Open-source **Zabbix monitoring templates** maintained by [Kernovix](https://github.com/Kernovix). This repository provides importable YAML templates and practical setup documentation for monitoring printers, networking equipment and infrastructure with Zabbix.
 
-> Independent project. Not affiliated with or endorsed by Zabbix SIA or Brother Industries.
+Currently available: **Brother DCP-9020CDW SNMP printer monitoring for Zabbix 7.0**, including toner and drum supplies, belt life, print counters, device availability and Ethernet/Wi-Fi interface statistics.
 
-## Template catalog
+> **Independent community project.** Not affiliated with, sponsored by or endorsed by Zabbix SIA or Brother Industries. Templates are not official Zabbix integrations.
 
-| Category | Vendor | Device | Supported Zabbix release | Documentation | Template |
+## Available Zabbix templates
+
+| Category | Manufacturer and model | Protocol | Zabbix version | Documentation | Download |
 | --- | --- | --- | --- | --- | --- |
-| Printers | Brother | DCP-9020CDW | 7.0 | [Details](Printers/Brother/DCP-9020CDW/README.md) | [YAML](Printers/Brother/DCP-9020CDW/7.0/template_brother_dcp9020cdw.yaml) |
+| Printers | **Brother DCP-9020CDW** | SNMPv2c, ICMP | **7.0** | [Brother DCP-9020CDW monitoring guide](Printers/Brother/DCP-9020CDW/README.md) | [Zabbix 7.0 YAML template](Printers/Brother/DCP-9020CDW/7.0/template_brother_dcp9020cdw.yaml) |
 
-## Getting started
+### Brother DCP-9020CDW — SNMP printer monitoring
 
-Read the device-specific README and import its YAML from **Data collection → Templates → Import**. Create a host with the correct SNMP interface and credentials; templates do not contain credentials or private IP addresses.
+The [Brother DCP-9020CDW Zabbix template](Printers/Brother/DCP-9020CDW/README.md) is based on actual SNMP data collected from the printer. It includes:
 
-## Support and validation
+- **Consumable monitoring:** CMYK toner readings using a Brother-specific private OID, plus black/cyan/magenta/yellow drum life and belt remaining life.
+- **Printer monitoring:** uptime, availability, printer status, total page counter, input tray and error-state monitoring.
+- **Network monitoring:** SNMP/ICMP reachability, interface discovery, reported link speed, inbound/outbound traffic, errors and discards.
+- **Alerts and trends:** warning and critical thresholds, Zabbix triggers and graphs.
 
-These templates are community-maintained and are not official Zabbix integrations. The Brother template was developed against actual SNMP walk results; **successful import into a live Zabbix 7.0 server and all device alerts have not yet been verified**. See the individual documentation for supported OIDs, assumptions, limitations and troubleshooting.
+**Important limitations:** private toner percentages still require validation against the printer panel; signal strength (RSSI), SSID and wireless channel are **not available** from the SNMP data tested. The template has not yet been confirmed by a successful import into a live Zabbix 7.0 instance. Review the [tested OIDs and compatibility notes](Printers/Brother/DCP-9020CDW/OIDS.md).
 
-## Contributing
+## Install a Zabbix SNMP template
 
-Issues and pull requests are welcome. Please provide the Zabbix release, printer model and firmware, exact error messages, and sanitized SNMP examples. **Never publish SNMP credentials, private IPs, MAC addresses, serial numbers or other sensitive inventory data.**
+1. Choose a device from the [template catalog](#available-zabbix-templates).
+2. Read its model-specific documentation and download the YAML file.
+3. In Zabbix, go to **Data collection → Templates → Import**.
+4. Import the template and create a new monitored host.
+5. Configure the correct SNMP host interface and its read-only credentials. Credentials are **not** embedded in the template.
+6. Link the imported template to the host. Inspect **Monitoring → Latest data**, discovery results and unsupported items before configuring notifications.
 
-## License
+For the Brother model, follow the full [installation and troubleshooting guide](Printers/Brother/DCP-9020CDW/README.md#installation).
 
-MIT — see [LICENSE](LICENSE).
+## Compatibility and project status
+
+| Device | Model | Monitoring technology | Status |
+| --- | --- | --- | --- |
+| Brother | DCP-9020CDW | SNMPv2c / Printer-MIB / IF-MIB / ICMP | Community-developed; collected OIDs verified, Zabbix live import pending |
+
+This repository is intended to grow with additional Zabbix templates, organized by **category → manufacturer → model → Zabbix version**. Contributions are welcome, but untested templates will be clearly identified.
+
+## Documentation and contributions
+
+- [Brother DCP-9020CDW: monitoring, installation and FAQ](Printers/Brother/DCP-9020CDW/README.md)
+- [Brother DCP-9020CDW: verified SNMP OID reference](Printers/Brother/DCP-9020CDW/OIDS.md)
+- [Contributing guidelines](CONTRIBUTING.md)
+- [MIT license](LICENSE)
+
+Please open a GitHub issue with reproducible behavior, Zabbix and firmware versions, sanitized examples, and the exact import error if applicable. Never share production SNMP community strings, tokens, private addresses, serial numbers or unsanitized SNMP walks.
+
+## Frequently asked questions
+
+**Does this repository provide a Brother DCP-9020CDW template for Zabbix 7.0?**  
+Yes. The [YAML template](Printers/Brother/DCP-9020CDW/7.0/template_brother_dcp9020cdw.yaml) targets Zabbix 7.0 and includes printer, supplies and network metrics. It still needs validation in a live instance.
+
+**Can Zabbix monitor Brother printer toner and drum levels over SNMP?**  
+The standard Printer-MIB on this unit reports numerical drum and belt lifetime values. Its toner levels are not numerical percentages, so the model-specific template attempts to decode a private Brother maintenance field. Verify these values before using them for alerting.
+
+**Does the template monitor Wi-Fi signal strength?**  
+It monitors network-interface traffic and reported link status. RSSI, SSID and Wi-Fi channel were not exposed by the tested IEEE 802.11 SNMP MIB.
+
+---
+
+Useful resources: [Zabbix documentation](https://www.zabbix.com/documentation/7.0/en) · [Zabbix community templates](https://github.com/zabbix/community-templates) · [RFC 3805 Printer-MIB](https://www.rfc-editor.org/rfc/rfc3805).
