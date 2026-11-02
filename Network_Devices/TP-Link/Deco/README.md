@@ -1,4 +1,3 @@
-
 # TP-Link Deco Zabbix 7.0 Monitoring Templates
 
 Community Zabbix templates for TP-Link Deco mesh systems. The package deliberately separates **node availability** from **controller-only mesh telemetry** so that every Deco can be monitored without creating unnecessary authenticated sessions.
