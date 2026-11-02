@@ -69,7 +69,7 @@ The API item downloads the encryption code exposed by the Deco local web UI, cre
 | --- | --- |
 | Controller health | CPU utilization and memory utilization |
 | Mesh summary | Mesh node count and mesh nodes online |
-| Clients | Online client count |
+| Clients | Reported client count and online client count |
 | Auto-discovered per-node inventory | Online state, role, IP address, model and firmware |
 | Auto-discovered per-node link data | Connection type, 2.4 GHz signal level, 5 GHz signal level and reported backhaul speed |
 
