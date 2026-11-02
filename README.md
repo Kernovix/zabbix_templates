@@ -2,15 +2,16 @@
 
 Open-source **Zabbix monitoring templates** maintained by [Kernovix](https://github.com/Kernovix). This repository provides importable YAML templates and practical setup documentation for monitoring printers, networking equipment and infrastructure with Zabbix.
 
-Currently available: **Brother DCP-9020CDW SNMP printer monitoring for Zabbix 7.0**, including toner and drum supplies, belt life, print counters, device availability and Ethernet/Wi-Fi interface statistics.
+Currently available: **Brother DCP-9020CDW SNMP printer monitoring for Zabbix 7.0** and **TP-Link Deco mesh monitoring for Zabbix 7.0**, covering node availability, controller telemetry and mesh-node discovery.
 
-> **Independent community project.** Not affiliated with, sponsored by or endorsed by Zabbix SIA or Brother Industries. Templates are not official Zabbix integrations.
+> **Independent community project.** Not affiliated with, sponsored by or endorsed by Zabbix SIA, Brother Industries or TP-Link. Templates are not official Zabbix integrations.
 
 ## Available Zabbix templates
 
 | Category | Manufacturer and model | Protocol | Zabbix version | Documentation | Download |
 | --- | --- | --- | --- | --- | --- |
 | Printers | **Brother DCP-9020CDW** | SNMPv2c, ICMP | **7.0** | [Brother DCP-9020CDW monitoring guide](Printers/Brother/DCP-9020CDW/README.md) | [Zabbix 7.0 YAML template](Printers/Brother/DCP-9020CDW/7.0/template_brother_dcp9020cdw.yaml) |
+| Network devices | **TP-Link Deco mesh systems** | ICMP, HTTPS, local encrypted API | **7.0** | [TP-Link Deco monitoring guide](Network_Devices/TP-Link/Deco/README.md) | [ICMP/HTTPS YAML](Network_Devices/TP-Link/Deco/7.0/template_tplink_deco_by_icmp_https.yaml) · [local-API YAML](Network_Devices/TP-Link/Deco/7.0/template_tplink_deco_by_local_api.yaml) |
 
 ### Brother DCP-9020CDW — SNMP printer monitoring
 
@@ -23,7 +24,17 @@ The [Brother DCP-9020CDW Zabbix template](Printers/Brother/DCP-9020CDW/README.md
 
 **Important limitations:** private toner percentages still require validation against the printer panel; signal strength (RSSI), SSID and wireless channel are **not available** from the SNMP data tested. The template has not yet been confirmed by a successful import into a live Zabbix 7.0 instance. Review the [tested OIDs and compatibility notes](Printers/Brother/DCP-9020CDW/OIDS.md).
 
-## Install a Zabbix SNMP template
+### TP-Link Deco — mesh availability and controller telemetry
+
+The [TP-Link Deco template package](Network_Devices/TP-Link/Deco/README.md) separates safe per-node monitoring from controller-only mesh telemetry:
+
+- **ICMP/HTTPS template:** link it to every Deco, including satellites; no credentials are required.
+- **Local-API template:** link it only to the controller; it collects CPU, memory, online-client count, mesh inventory, per-node status and reported link details through the local encrypted web API.
+- **Alert safety:** controller API timeouts are handled as missing data, rather than false zero values or false offline nodes. The guide documents conservative confirmation windows and known firmware limitations.
+
+**Important limitations:** the Deco local API is undocumented and may change between firmware versions. The local-API template requires a host-level Secret text password macro and must be validated on the target controller before alert actions are enabled. See the [Deco validation notes](Network_Devices/TP-Link/Deco/TESTING.md).
+
+## Install a Zabbix template
 
 1. Choose a device from the [template catalog](#available-zabbix-templates).
 2. Read its model-specific documentation and download the YAML file.
@@ -32,13 +43,14 @@ The [Brother DCP-9020CDW Zabbix template](Printers/Brother/DCP-9020CDW/README.md
 5. Configure the correct SNMP host interface and its read-only credentials. Credentials are **not** embedded in the template.
 6. Link the imported template to the host. Inspect **Monitoring → Latest data**, discovery results and unsupported items before configuring notifications.
 
-For the Brother model, follow the full [installation and troubleshooting guide](Printers/Brother/DCP-9020CDW/README.md#installation).
+For the Brother model, follow the full [installation and troubleshooting guide](Printers/Brother/DCP-9020CDW/README.md#installation). For TP-Link Deco, follow the [controller and satellite installation guide](Network_Devices/TP-Link/Deco/README.md#installation).
 
 ## Compatibility and project status
 
 | Device | Model | Monitoring technology | Status |
 | --- | --- | --- | --- |
 | Brother | DCP-9020CDW | SNMPv2c / Printer-MIB / IF-MIB / ICMP | Community-developed; collected OIDs verified, Zabbix live import pending |
+| TP-Link | Deco mesh systems | ICMP / HTTPS / local encrypted API | Community-developed; controller collection validated on Zabbix 7.0.32; see model/firmware and trigger limitations in the package guide |
 
 This repository is intended to grow with additional Zabbix templates, organized by **category → manufacturer → model → Zabbix version**. Contributions are welcome, but untested templates will be clearly identified.
 
@@ -46,6 +58,8 @@ This repository is intended to grow with additional Zabbix templates, organized 
 
 - [Brother DCP-9020CDW: monitoring, installation and FAQ](Printers/Brother/DCP-9020CDW/README.md)
 - [Brother DCP-9020CDW: verified SNMP OID reference](Printers/Brother/DCP-9020CDW/OIDS.md)
+- [TP-Link Deco: controller and satellite monitoring guide](Network_Devices/TP-Link/Deco/README.md)
+- [TP-Link Deco: validation notes](Network_Devices/TP-Link/Deco/TESTING.md)
 - [Contributing guidelines](CONTRIBUTING.md)
 - [MIT license](LICENSE)
 
@@ -61,6 +75,9 @@ The standard Printer-MIB on this unit reports numerical drum and belt lifetime v
 
 **Does the template monitor Wi-Fi signal strength?**  
 It monitors network-interface traffic and reported link status. RSSI, SSID and Wi-Fi channel were not exposed by the tested IEEE 802.11 SNMP MIB.
+
+**Does this repository provide TP-Link Deco templates for Zabbix 7.0?**  
+Yes. The [TP-Link Deco package](Network_Devices/TP-Link/Deco/README.md) contains an agentless ICMP/HTTPS template for every Deco and a separate local-API template for the mesh controller only. Review the documented API and firmware limitations before enabling alert actions.
 
 ---
 
