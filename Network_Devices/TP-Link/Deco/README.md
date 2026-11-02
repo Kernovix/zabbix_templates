@@ -91,18 +91,19 @@ The templates favour confirmed faults over noisy alerts.
 | Local API | High CPU or memory | Last three successful readings all above the configured threshold | Warning |
 | Local API | Mesh node offline | Two consecutive successful controller collections report the node offline | High |
 
-The controller defaults are deliberately conservative: a 15-minute API interval and a one-hour no-data period. A transient Deco API timeout therefore does not turn into a false node-offline, CPU, or memory problem.
+The controller defaults are deliberately conservative: a fixed 15-minute API interval and a one-hour no-data period. A transient Deco API timeout therefore does not turn into a false node-offline, CPU, or memory problem.
 
 ## Local API macros
 
 | Macro | Default | Meaning |
 | --- | ---: | --- |
-| `{$DECO.API.INTERVAL}` | `15m` | Full local-API collection interval. Do not reduce without proving that the controller handles the additional sessions. |
 | `{$DECO.API.NODATA}` | `1h` | Time without a successful API collection before an API problem opens. |
 | `{$DECO.CPU.WARN}` | `90` | CPU percentage required in all of the last three successful samples. |
 | `{$DECO.MEMORY.WARN}` | `90` | Memory percentage required in all of the last three successful samples. |
 | `{$DECO.PASSWORD}` | *(empty secret)* | Required Deco owner password; configure at host level. |
 | `{$DECO.SCHEME}` | `https` | Management interface scheme. |
+
+The local-API item interval is fixed at **15 minutes** in the template. This prevents an unresolved user macro from making the item unsupported and avoids unnecessary Deco sessions. If a different interval is required, change the item delay directly in a lab-tested copy of the template and keep it conservative.
 
 ## Basic-template macros
 
