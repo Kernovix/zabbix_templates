@@ -104,7 +104,7 @@ zabbix_export:
       history: 30d
       trends: 365d
       units: pages
-      description: prtMarkerLifeCount; contador devolveu 1949 no levantamento
+      description: prtMarkerLifeCount; the initial SNMP walk returned 1949 pages
     - uuid: 433ac0dbd7014064ab15e9749ab7d4ee
       name: Tray 1 capacity
       type: SNMP_AGENT
@@ -141,7 +141,7 @@ zabbix_export:
       delay: 1m
       history: 30d
       trends: 365d
-      description: prtAlertCode. O levantamento devolveu 0
+      description: prtAlertCode. The initial SNMP walk returned 0
     - uuid: a7c0dca879394c97b738f426b198ac37
       name: Alerta Printer-MIB texto
       type: SNMP_AGENT
@@ -160,9 +160,9 @@ zabbix_export:
       delay: 1m
       history: 30d
       trends: 365d
-      description: prtAlertSeverityLevel; 1 other, 3 critical, 4 warning; alguns dispositivos devolvem 0
+      description: prtAlertSeverityLevel; 1 other, 3 critical, 4 warning; some devices return 0
     - uuid: 519dc10bd627423ebf8dfa427d7b3745
-      name: Brother manutencao privada bloco hexadecimal
+      name: Brother private maintenance binary block
       type: SNMP_AGENT
       snmp_oid: 1.3.6.1.4.1.2435.2.3.9.4.2.1.5.5.8.0
       key: brother.maintenance.raw
@@ -170,7 +170,7 @@ zabbix_export:
       history: 30d
       value_type: TEXT
       trends: '0'
-      description: Bloco Brother brInfoMaintenance; firmware devolve OCTET STRING binario. Pode chegar como caracteres
+      description: Brother brInfoMaintenance block; firmware returns a binary OCTET STRING, which may arrive as characters
         binarios e not hex; confirmar em Latest data antes de ativar itens derivados
     - uuid: e6b47b3d62874e3ebe075ba2a738a8d0
       name: Belt unit - capacity
@@ -326,7 +326,7 @@ zabbix_export:
       history: 30d
       value_type: FLOAT
       trends: 365d
-      description: Valores -3 (some remaining) e -2 (unknown) NAO representam percentagens. Sem alerta percentagem
+      description: Values -3 (some remaining) and -2 (unknown) do not represent percentages. Do not trigger percentage alerts
         ate validar OID privado
     - uuid: afe033dbca1d4cac83949b5b2292b6ec
       name: Cyan toner - nivel Printer-MIB
@@ -337,7 +337,7 @@ zabbix_export:
       history: 30d
       value_type: FLOAT
       trends: 365d
-      description: Valores -3 (some remaining) e -2 (unknown) NAO representam percentagens. Sem alerta percentagem
+      description: Values -3 (some remaining) and -2 (unknown) do not represent percentages. Do not trigger percentage alerts
         ate validar OID privado
     - uuid: 59477a4900c247b991d4e40372c395da
       name: Magenta toner - nivel Printer-MIB
@@ -348,7 +348,7 @@ zabbix_export:
       history: 30d
       value_type: FLOAT
       trends: 365d
-      description: Valores -3 (some remaining) e -2 (unknown) NAO representam percentagens. Sem alerta percentagem
+      description: Values -3 (some remaining) and -2 (unknown) do not represent percentages. Do not trigger percentage alerts
         ate validar OID privado
     - uuid: de2d9dcbf32648bfaeb2dceae34f993b
       name: Yellow toner - nivel Printer-MIB
@@ -359,7 +359,7 @@ zabbix_export:
       history: 30d
       value_type: FLOAT
       trends: 365d
-      description: Valores -3 (some remaining) e -2 (unknown) NAO representam percentagens. Sem alerta percentagem
+      description: Values -3 (some remaining) and -2 (unknown) do not represent percentages. Do not trigger percentage alerts
         ate validar OID privado
     - uuid: 9cd76112addf41ad91bfb9e56b5ecf96
       name: Waste toner box - Printer-MIB level
@@ -370,7 +370,7 @@ zabbix_export:
       history: 30d
       value_type: FLOAT
       trends: 365d
-      description: Valores -3 (some remaining) e -2 (unknown) NAO representam percentagens. Sem alerta percentagem
+      description: Values -3 (some remaining) and -2 (unknown) do not represent percentages. Do not trigger percentage alerts
         ate validar OID privado
     - uuid: cca3d79fb22a4d8a86ab76e0e2e4d668
       name: Black toner - nivel privado (%)
@@ -473,7 +473,7 @@ zabbix_export:
       description: Tempo medio de resposta ICMP; inclui variacoes de Wi-Fi e standby.
       value_type: FLOAT
     - uuid: 843a555dcc6b41e594a11c506e69fe11
-      name: Erros da impressora - bits descodificados HR-MIB
+      name: Printer errors - decoded Host Resources MIB bits
       type: DEPENDENT
       key: brother.printer.error.flags
       master_item:
@@ -537,7 +537,7 @@ zabbix_export:
         delay: 1h
         history: 14d
         trends: 365d
-        description: 'IF-MIB ifType: Brother devolveu 7 nas interfaces 1,2,3; esse valor not identifica de forma
+        description: 'IF-MIB ifType: Brother returned 7 on interfaces 1, 2, and 3; this value does not reliably identify
           reliably distinguish the physical network medium on this printer.'
       - uuid: 4028ef0aec494f37b0eea64cbaf5e205
         name: 'Interface #{#SNMPINDEX} ({#IFDESCR}): Administrative status'
@@ -1014,7 +1014,7 @@ zabbix_export:
     name: 'Brother: ICMP packet loss above 20% (5m)'
     expression: min(/Brother DCP-9020CDW by SNMP/icmppingloss,5m)>{$BROTHER.PING.LOSS.WARN}
     priority: WARNING
-    description: Zabbix tem de conseguir pingar a impressora. O estado de sleep pode influenciar a resposta ICMP.
+    description: Zabbix must be able to ping the printer. Sleep mode may affect ICMP response.
     tags:
     - tag: component
       value: network
