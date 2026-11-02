@@ -1,0 +1,9 @@
+*.log
+*.bak
+*.swp
+*.pyc
+__pycache__/
+.env
+.snmprc
+*-private-snmp.txt
+*.pcap
