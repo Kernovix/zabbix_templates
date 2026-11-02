@@ -1,4 +1,3 @@
-
 # TP-Link Deco Template Validation Notes
 
 This document records the validation status of the templates in this directory. It intentionally excludes real host names, management addresses, passwords, MAC addresses and raw API responses.
