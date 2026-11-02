@@ -28,7 +28,7 @@ zabbix_export:
           name: 'Deco API compact source data'
           type: SCRIPT
           key: tplink.deco.api.raw
-          delay: '{$DECO.API.INTERVAL}'
+          delay: 15m
           history: 1d
           trends: '0'
           value_type: TEXT
@@ -602,9 +602,6 @@ zabbix_export:
                 - tag: node
                   value: '{#DECO.NAME}'
       macros:
-        - macro: '{$DECO.API.INTERVAL}'
-          value: 15m
-          description: 'Full Deco API collection interval. Do not reduce it: the firmware may limit authenticated sessions.'
         - macro: '{$DECO.API.NODATA}'
           value: 1h
           description: 'Period without a successful collection before the API no-data problem opens. It should span multiple collection intervals.'
