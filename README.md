@@ -29,7 +29,7 @@ The [Brother DCP-9020CDW Zabbix template](Printers/Brother/DCP-9020CDW/README.md
 The [TP-Link Deco template package](Network_Devices/TP-Link/Deco/README.md) separates safe per-node monitoring from controller-only mesh telemetry:
 
 - **ICMP/HTTPS template:** link it to every Deco, including satellites; no credentials are required.
-- **Local-API template:** link it only to the controller; it collects CPU, memory, online-client count, mesh inventory, per-node status and reported link details through the local encrypted web API.
+- **Local-API template:** link it only to the controller; it collects CPU, memory, client totals, mesh inventory, per-node status and reported link details through the local encrypted web API.
 - **Alert safety:** controller API timeouts are handled as missing data, rather than false zero values or false offline nodes. The guide documents conservative confirmation windows and known firmware limitations.
 
 **Important limitations:** the Deco local API is undocumented and may change between firmware versions. The local-API template requires a host-level Secret text password macro and must be validated on the target controller before alert actions are enabled. See the [Deco validation notes](Network_Devices/TP-Link/Deco/TESTING.md).
