@@ -1,0 +1,1143 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+  - uuid: 5352cfbcde74413a9be4294473cf5b77
+    name: Templates/Printers
+  templates:
+  - uuid: 9bd2f38d9d9943cdb2a2beca5cd1f5d1
+    template: Brother DCP-9020CDW by SNMP
+    name: Brother DCP-9020CDW by SNMP
+    description: 'Community SNMP monitoring template for Brother DCP-9020CDW on Zabbix 7.0. Based on actual SNMP walks. Check Zabbix import and validate proprietary toner parsing against the printer panel before relying on alerts. Wi-Fi RSSI, SSID and radio channel are not supported by the observed firmware.'
+    groups:
+    - name: Templates/Printers
+    items:
+    - uuid: 908e874c48df441aa4e97591b3d55bf1
+      name: ICMP ping
+      type: SIMPLE
+      key: icmpping
+      delay: 1m
+      history: 30d
+      trends: 365d
+      description: ICMP printer availability
+    - uuid: 9ed57a7ced7f43038374bd208b677552
+      name: SNMP availability
+      type: INTERNAL
+      key: zabbix[host,snmp,available]
+      delay: 1m
+      history: 30d
+      trends: 365d
+      description: 0 unavailable, 1 available, 2 unknown
+    - uuid: a828e48bb98f459d97364990e8494965
+      name: Identification and firmware
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.1.0
+      key: brother.sysdescr
+      delay: 1h
+      history: 30d
+      value_type: CHAR
+      trends: '0'
+    - uuid: 30bf535057a0418593e67fa4e5597571
+      name: SNMP name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.5.0
+      key: brother.sysname
+      delay: 1h
+      history: 30d
+      value_type: CHAR
+      trends: '0'
+    - uuid: d6b66fe250904d6bafd563439d8b53bf
+      name: Uptime
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.3.0
+      key: brother.uptime
+      delay: 5m
+      history: 30d
+      trends: 365d
+      units: uptime
+      preprocessing:
+      - type: MULTIPLIER
+        parameters:
+        - '0.01'
+    - uuid: 5f18241549cf40749e92a900cbc97b2d
+      name: Device model
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.25.3.2.1.3.1
+      key: brother.model
+      delay: 1h
+      history: 30d
+      value_type: CHAR
+      trends: '0'
+    - uuid: 6178c339b5fc40e69553bd06bb5b863d
+      name: Printer status
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.25.3.5.1.1.1
+      key: brother.printer.status
+      delay: 1m
+      history: 30d
+      trends: 365d
+      description: 'hrPrinterStatus: 1 other,2 unknown,3 idle,4 printing,5 warmup'
+    - uuid: 2fba230ef9a647498bd9f21698618bb0
+      name: Printer error bitmap
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.25.3.5.1.2.1
+      key: brother.printer.errors
+      delay: 1m
+      history: 30d
+      value_type: TEXT
+      trends: '0'
+      description: hrPrinterDetectedErrorState bitmap; formato OCTET STRING depende do agente
+    - uuid: c76f520108ee4950a784c320eeb0a3b5
+      name: Internal device status
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.25.3.2.1.5.1
+      key: brother.device.status
+      delay: 2m
+      history: 30d
+      trends: 365d
+      description: 'hrDeviceStatus: 1 unknown, 2 running, 3 warning, 4 testing, 5 down'
+    - uuid: f141469525bd4d288005ff317986f14a
+      name: Total printed pages
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.1.1
+      key: brother.pages.total
+      delay: 5m
+      history: 30d
+      trends: 365d
+      units: pages
+      description: prtMarkerLifeCount; contador devolveu 1949 no levantamento
+    - uuid: 433ac0dbd7014064ab15e9749ab7d4ee
+      name: Tray 1 capacity
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.8.2.1.9.1.1
+      key: brother.tray1.capacity
+      delay: 1h
+      history: 30d
+      trends: 365d
+      units: pages
+    - uuid: 8f6f6da65ca54ec1a76680c70442da52
+      name: Tray 1 raw paper level
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.8.2.1.10.1.1
+      key: brother.tray1.level
+      delay: 2m
+      history: 30d
+      value_type: FLOAT
+      trends: 365d
+      description: -3 means some paper remains but its quantity is unknown; -2 unknown
+    - uuid: aeb9319d5972427e91beecdea862c667
+      name: Tray 1 name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.8.2.1.13.1.1
+      key: brother.tray1.name
+      delay: 1h
+      history: 30d
+      value_type: CHAR
+      trends: '0'
+    - uuid: a649264ae46546e38cd932c01a7a6ce2
+      name: Alerta Printer-MIB codigo
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.18.1.1.7.1.1
+      key: brother.alert.code
+      delay: 1m
+      history: 30d
+      trends: 365d
+      description: prtAlertCode. O levantamento devolveu 0
+    - uuid: a7c0dca879394c97b738f426b198ac37
+      name: Alerta Printer-MIB texto
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.18.1.1.8.1.1
+      key: brother.alert.text
+      delay: 1m
+      history: 30d
+      value_type: CHAR
+      trends: '0'
+      description: 'prtAlertDescription. Levantamento: Em espera'
+    - uuid: 7208468baa744d6cb1c87eda3f65f335
+      name: Alerta Printer-MIB severidade
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.18.1.1.2.1.1
+      key: brother.alert.severity
+      delay: 1m
+      history: 30d
+      trends: 365d
+      description: prtAlertSeverityLevel; 1 other, 3 critical, 4 warning; alguns dispositivos devolvem 0
+    - uuid: 519dc10bd627423ebf8dfa427d7b3745
+      name: Brother manutencao privada bloco hexadecimal
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.4.1.2435.2.3.9.4.2.1.5.5.8.0
+      key: brother.maintenance.raw
+      delay: 5m
+      history: 30d
+      value_type: TEXT
+      trends: '0'
+      description: Bloco Brother brInfoMaintenance; firmware devolve OCTET STRING binario. Pode chegar como caracteres
+        binarios e not hex; confirmar em Latest data antes de ativar itens derivados
+    - uuid: e6b47b3d62874e3ebe075ba2a738a8d0
+      name: Belt unit - capacity
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.11.1.1.8.1.6
+      key: brother.supply.max[6]
+      delay: 1h
+      history: 30d
+      trends: 365d
+      units: pages
+    - uuid: 38c1c019e483436d9fd819e019cf0f87
+      name: Belt unit - remaining
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.1.6
+      key: brother.supply.remaining[6]
+      delay: 5m
+      history: 30d
+      trends: 365d
+      units: pages
+    - uuid: 427cc06a842b439f9340556faf4d06f7
+      name: Belt unit - remaining life (%)
+      type: CALCULATED
+      key: brother.supply.pct[6]
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      trends: 365d
+      units: '%'
+      description: 100 x remaining / max, calculated from verified OIDs
+      params: 100*last(//brother.supply.remaining[6])/last(//brother.supply.max[6])
+    - uuid: 89c95cb243f34116a8926d8b4f58c461
+      name: Black drum - capacity
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.11.1.1.8.1.7
+      key: brother.supply.max[7]
+      delay: 1h
+      history: 30d
+      trends: 365d
+      units: pages
+    - uuid: c749bca8a3d14f4abf39db07fea50d7f
+      name: Black drum - remaining
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.1.7
+      key: brother.supply.remaining[7]
+      delay: 5m
+      history: 30d
+      trends: 365d
+      units: pages
+    - uuid: d4d31dac141145d8b50351bb3e77a2e2
+      name: Black drum - remaining life (%)
+      type: CALCULATED
+      key: brother.supply.pct[7]
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      trends: 365d
+      units: '%'
+      description: 100 x remaining / max, calculated from verified OIDs
+      params: 100*last(//brother.supply.remaining[7])/last(//brother.supply.max[7])
+    - uuid: 58c6aa24e88349b29e3cb935bdbdaa89
+      name: Cyan drum - capacity
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.11.1.1.8.1.8
+      key: brother.supply.max[8]
+      delay: 1h
+      history: 30d
+      trends: 365d
+      units: pages
+    - uuid: ced013b414f64e37af5c748b551578b6
+      name: Cyan drum - remaining
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.1.8
+      key: brother.supply.remaining[8]
+      delay: 5m
+      history: 30d
+      trends: 365d
+      units: pages
+    - uuid: f91be57b26a9437e897ee3f93ecd9591
+      name: Cyan drum - remaining life (%)
+      type: CALCULATED
+      key: brother.supply.pct[8]
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      trends: 365d
+      units: '%'
+      description: 100 x remaining / max, calculated from verified OIDs
+      params: 100*last(//brother.supply.remaining[8])/last(//brother.supply.max[8])
+    - uuid: 774851bd9a9c4006b1fed68f55d97ffd
+      name: Magenta drum - capacity
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.11.1.1.8.1.9
+      key: brother.supply.max[9]
+      delay: 1h
+      history: 30d
+      trends: 365d
+      units: pages
+    - uuid: d7f7f8af4fd74630add05bfb5f4b5ffc
+      name: Magenta drum - remaining
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.1.9
+      key: brother.supply.remaining[9]
+      delay: 5m
+      history: 30d
+      trends: 365d
+      units: pages
+    - uuid: 86b456b1121d401d9258b0667141bd17
+      name: Magenta drum - remaining life (%)
+      type: CALCULATED
+      key: brother.supply.pct[9]
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      trends: 365d
+      units: '%'
+      description: 100 x remaining / max, calculated from verified OIDs
+      params: 100*last(//brother.supply.remaining[9])/last(//brother.supply.max[9])
+    - uuid: 02bc2bfeb93d4032addbf5271a940f25
+      name: Yellow drum - capacity
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.11.1.1.8.1.10
+      key: brother.supply.max[10]
+      delay: 1h
+      history: 30d
+      trends: 365d
+      units: pages
+    - uuid: bb24b0594e31401497ba4e416910717b
+      name: Yellow drum - remaining
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.1.10
+      key: brother.supply.remaining[10]
+      delay: 5m
+      history: 30d
+      trends: 365d
+      units: pages
+    - uuid: ee597575f64b4f7494b816c0aa1a4e1b
+      name: Yellow drum - remaining life (%)
+      type: CALCULATED
+      key: brother.supply.pct[10]
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      trends: 365d
+      units: '%'
+      description: 100 x remaining / max, calculated from verified OIDs
+      params: 100*last(//brother.supply.remaining[10])/last(//brother.supply.max[10])
+    - uuid: b567cccd4247446a81dd9f0c4c419ad9
+      name: Black toner - nivel Printer-MIB
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.1.1
+      key: brother.supply.raw[1]
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      trends: 365d
+      description: Valores -3 (some remaining) e -2 (unknown) NAO representam percentagens. Sem alerta percentagem
+        ate validar OID privado
+    - uuid: afe033dbca1d4cac83949b5b2292b6ec
+      name: Cyan toner - nivel Printer-MIB
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.1.2
+      key: brother.supply.raw[2]
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      trends: 365d
+      description: Valores -3 (some remaining) e -2 (unknown) NAO representam percentagens. Sem alerta percentagem
+        ate validar OID privado
+    - uuid: 59477a4900c247b991d4e40372c395da
+      name: Magenta toner - nivel Printer-MIB
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.1.3
+      key: brother.supply.raw[3]
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      trends: 365d
+      description: Valores -3 (some remaining) e -2 (unknown) NAO representam percentagens. Sem alerta percentagem
+        ate validar OID privado
+    - uuid: de2d9dcbf32648bfaeb2dceae34f993b
+      name: Yellow toner - nivel Printer-MIB
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.1.4
+      key: brother.supply.raw[4]
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      trends: 365d
+      description: Valores -3 (some remaining) e -2 (unknown) NAO representam percentagens. Sem alerta percentagem
+        ate validar OID privado
+    - uuid: 9cd76112addf41ad91bfb9e56b5ecf96
+      name: Waste toner box - Printer-MIB level
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.1.5
+      key: brother.supply.raw[5]
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      trends: 365d
+      description: Valores -3 (some remaining) e -2 (unknown) NAO representam percentagens. Sem alerta percentagem
+        ate validar OID privado
+    - uuid: cca3d79fb22a4d8a86ab76e0e2e4d668
+      name: Black toner - nivel privado (%)
+      type: DEPENDENT
+      key: brother.toner.pct[black]
+      history: 30d
+      value_type: FLOAT
+      trends: 365d
+      units: '%'
+      description: Brother private TLV field decoding 0x81; validate percentage against the printer panel.
+      master_item:
+        key: brother.maintenance.raw
+      preprocessing:
+      - type: JAVASCRIPT
+        parameters:
+        - "var s=String(value);var b=[];\nif (/^(?:\\s*[0-9A-Fa-f]{2}\\s*)+$/.test(s)) {\n var h=s.match(/[0-9A-Fa-f]{2}/g);for(var\
+          \ z=0;z<h.length;z++) b.push(parseInt(h[z],16));\n} else if (/^Hex-STRING:/i.test(s)) {\n var a=s.slice(11).match(/[0-9A-Fa-f]{2}/g)||[];for(var\
+          \ z=0;z<a.length;z++)b.push(parseInt(a[z],16));\n} else {for(var z=0;z<s.length;z++)b.push(s.charCodeAt(z)&255);}\n\
+          for(var i=0;i+6<b.length;i++){\n if(b[i]===0x81 && b[i+1]===1 && b[i+2]===4){\n var v=(((b[i+3]*256+b[i+4])*256+b[i+5])*256+b[i+6]);\n\
+          \ if(v>=0&&v<=100)return v;\n }\n}\nthrow 'O bloco Brother not contem percentagem valida para 81';"
+        error_handler: DISCARD_VALUE
+    - uuid: d87f2c382d8e4f46a609cbc1d37cd704
+      name: Cyan toner - nivel privado (%)
+      type: DEPENDENT
+      key: brother.toner.pct[cyan]
+      history: 30d
+      value_type: FLOAT
+      trends: 365d
+      units: '%'
+      description: Brother private TLV field decoding 0x82; validate percentage against the printer panel.
+      master_item:
+        key: brother.maintenance.raw
+      preprocessing:
+      - type: JAVASCRIPT
+        parameters:
+        - "var s=String(value);var b=[];\nif (/^(?:\\s*[0-9A-Fa-f]{2}\\s*)+$/.test(s)) {\n var h=s.match(/[0-9A-Fa-f]{2}/g);for(var\
+          \ z=0;z<h.length;z++) b.push(parseInt(h[z],16));\n} else if (/^Hex-STRING:/i.test(s)) {\n var a=s.slice(11).match(/[0-9A-Fa-f]{2}/g)||[];for(var\
+          \ z=0;z<a.length;z++)b.push(parseInt(a[z],16));\n} else {for(var z=0;z<s.length;z++)b.push(s.charCodeAt(z)&255);}\n\
+          for(var i=0;i+6<b.length;i++){\n if(b[i]===0x82 && b[i+1]===1 && b[i+2]===4){\n var v=(((b[i+3]*256+b[i+4])*256+b[i+5])*256+b[i+6]);\n\
+          \ if(v>=0&&v<=100)return v;\n }\n}\nthrow 'O bloco Brother not contem percentagem valida para 82';"
+        error_handler: DISCARD_VALUE
+    - uuid: 9d92602a16354525a291dbe724bd0756
+      name: Magenta toner - nivel privado (%)
+      type: DEPENDENT
+      key: brother.toner.pct[magenta]
+      history: 30d
+      value_type: FLOAT
+      trends: 365d
+      units: '%'
+      description: Brother private TLV field decoding 0x83; validate percentage against the printer panel.
+      master_item:
+        key: brother.maintenance.raw
+      preprocessing:
+      - type: JAVASCRIPT
+        parameters:
+        - "var s=String(value);var b=[];\nif (/^(?:\\s*[0-9A-Fa-f]{2}\\s*)+$/.test(s)) {\n var h=s.match(/[0-9A-Fa-f]{2}/g);for(var\
+          \ z=0;z<h.length;z++) b.push(parseInt(h[z],16));\n} else if (/^Hex-STRING:/i.test(s)) {\n var a=s.slice(11).match(/[0-9A-Fa-f]{2}/g)||[];for(var\
+          \ z=0;z<a.length;z++)b.push(parseInt(a[z],16));\n} else {for(var z=0;z<s.length;z++)b.push(s.charCodeAt(z)&255);}\n\
+          for(var i=0;i+6<b.length;i++){\n if(b[i]===0x83 && b[i+1]===1 && b[i+2]===4){\n var v=(((b[i+3]*256+b[i+4])*256+b[i+5])*256+b[i+6]);\n\
+          \ if(v>=0&&v<=100)return v;\n }\n}\nthrow 'O bloco Brother not contem percentagem valida para 83';"
+        error_handler: DISCARD_VALUE
+    - uuid: e19731053fa14af799bb08f8ec8e6c1f
+      name: Yellow toner - nivel privado (%)
+      type: DEPENDENT
+      key: brother.toner.pct[yellow]
+      history: 30d
+      value_type: FLOAT
+      trends: 365d
+      units: '%'
+      description: Brother private TLV field decoding 0x84; validate percentage against the printer panel.
+      master_item:
+        key: brother.maintenance.raw
+      preprocessing:
+      - type: JAVASCRIPT
+        parameters:
+        - "var s=String(value);var b=[];\nif (/^(?:\\s*[0-9A-Fa-f]{2}\\s*)+$/.test(s)) {\n var h=s.match(/[0-9A-Fa-f]{2}/g);for(var\
+          \ z=0;z<h.length;z++) b.push(parseInt(h[z],16));\n} else if (/^Hex-STRING:/i.test(s)) {\n var a=s.slice(11).match(/[0-9A-Fa-f]{2}/g)||[];for(var\
+          \ z=0;z<a.length;z++)b.push(parseInt(a[z],16));\n} else {for(var z=0;z<s.length;z++)b.push(s.charCodeAt(z)&255);}\n\
+          for(var i=0;i+6<b.length;i++){\n if(b[i]===0x84 && b[i+1]===1 && b[i+2]===4){\n var v=(((b[i+3]*256+b[i+4])*256+b[i+5])*256+b[i+6]);\n\
+          \ if(v>=0&&v<=100)return v;\n }\n}\nthrow 'O bloco Brother not contem percentagem valida para 84';"
+        error_handler: DISCARD_VALUE
+    - uuid: c5807641212947c48900f49b3f8fce14
+      name: 'Rede: perda de pacotes ICMP (%)'
+      type: SIMPLE
+      key: icmppingloss
+      delay: 1m
+      history: 30d
+      trends: 365d
+      units: '%'
+      description: ICMP packet loss measured by Zabbix server/proxy, not the printer.
+      value_type: FLOAT
+    - uuid: 06a5c9d53469499aa4f6d32e59d870c8
+      name: 'Rede: latencia ICMP (s)'
+      type: SIMPLE
+      key: icmppingsec
+      delay: 1m
+      history: 30d
+      trends: 365d
+      units: s
+      description: Tempo medio de resposta ICMP; inclui variacoes de Wi-Fi e standby.
+      value_type: FLOAT
+    - uuid: 843a555dcc6b41e594a11c506e69fe11
+      name: Erros da impressora - bits descodificados HR-MIB
+      type: DEPENDENT
+      key: brother.printer.error.flags
+      master_item:
+        key: brother.printer.errors
+      delay: '0'
+      history: 30d
+      trends: 365d
+      description: Bit N indicates condition N da hrPrinterDetectedErrorState (RFC 2790), processada a partir de OCTET
+        STRING. 0 indica nenhuma condicao. Confirmar valores em Zabbix Latest Data.
+      preprocessing:
+      - type: JAVASCRIPT
+        parameters:
+        - "var s=String(value), b=[];\nif (/^\\s*(?:Hex-STRING\\s*:\\s*)/i.test(s)) {\n s=s.replace(/^\\s*Hex-STRING\\\
+          s*:\\s*/i, '');\n}\nif (/^\\s*0x(?:[0-9a-f]{2})+\\s*$/i.test(s)) s=s.trim().slice(2);\nif (/^\\s*(?:[0-9a-f]{2}\\\
+          s*)+$/i.test(s) && s.trim()!=='') {\n var hex=s.match(/[0-9a-f]{2}/gi)||[];\n for (var i=0;i<hex.length;i++)b.push(parseInt(hex[i],16));\n\
+          } else {\n for (var j=0;j<s.length;j++)b.push(s.charCodeAt(j)&255);\n}\nif (b.length===0) return 0;\n\
+          var v=0;\nfor (var byteIndex=0;byteIndex<Math.min(2,b.length);byteIndex++){\n for (var bit=0;bit<8;bit++)\
+          \ {\n  if ((b[byteIndex] & (128>>bit))!==0) v+=(1<<(byteIndex*8+bit));\n }\n}\nreturn v;"
+    discovery_rules:
+    - uuid: 69b341d1ffd146a586590ca899deea9b
+      name: Descoberta de consumiveis Printer-MIB
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#SUPPLYNAME},1.3.6.1.2.1.43.11.1.1.6.1]
+      key: brother.supplies.discovery
+      delay: 6h
+      item_prototypes:
+      - uuid: dd53cbe5d902443488f45bec577b1b81
+        name: 'Supply {#SUPPLYNAME}: raw level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.1.{#SNMPINDEX}
+        key: brother.supply.discovered.level[{#SNMPINDEX}]
+        delay: 15m
+        history: 7d
+        trends: 90d
+        value_type: FLOAT
+        description: Valor bruto. Negativos indicam niveis indeterminados; not aplicar limiares percentuais.
+      - uuid: 28eba8e1fcfa4305b829beba0cd8cc52
+        name: 'Supply {#SUPPLYNAME}: capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.8.1.{#SNMPINDEX}
+        key: brother.supply.discovered.capacity[{#SNMPINDEX}]
+        delay: 1h
+        history: 7d
+        trends: 90d
+        value_type: FLOAT
+    - uuid: b28ee9bc260f4a41af2fcdbcf75e20f5
+      name: Descoberta das network interfaces (IF-MIB, indices 1-4)
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#IFDESCR},1.3.6.1.2.1.2.2.1.2]
+      key: brother.net.interfaces.discovery
+      delay: 1h
+      description: ifDescr/index sao confirmados. idx1 Wi-Fi provavel (72Mbps, ativo), idx2 Ethernet provavel (100Mbps,
+        administrativamente down), idx3 Wi-Fi secundaria (down), idx4 loopback. ifType=7 nas 3 interfaces fisicas;
+        not usar ifType para discriminar Wi-Fi. Consultar Latest data.
+      item_prototypes:
+      - uuid: 8bc42fd163c9470b9d745d002d9c79e5
+        name: 'Interface #{#SNMPINDEX} ({#IFDESCR}): Tipo (IANA ifType)'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.2.2.1.3.{#SNMPINDEX}
+        key: brother.net.if.type[{#SNMPINDEX}]
+        delay: 1h
+        history: 14d
+        trends: 365d
+        description: 'IF-MIB ifType: Brother devolveu 7 nas interfaces 1,2,3; esse valor not identifica de forma
+          reliably distinguish the physical network medium on this printer.'
+      - uuid: 4028ef0aec494f37b0eea64cbaf5e205
+        name: 'Interface #{#SNMPINDEX} ({#IFDESCR}): Administrative status'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.2.2.1.7.{#SNMPINDEX}
+        key: brother.net.if.admin[{#SNMPINDEX}]
+        delay: 1m
+        history: 14d
+        trends: 365d
+        description: 1 up, 2 down, 3 testing
+        valuemap:
+          name: Brother IF-MIB admin state
+      - uuid: 438d476ab19b4f8399129e8e58dcafcb
+        name: 'Interface #{#SNMPINDEX} ({#IFDESCR}): Operational status'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.2.2.1.8.{#SNMPINDEX}
+        key: brother.net.if.oper[{#SNMPINDEX}]
+        delay: 1m
+        history: 14d
+        trends: 365d
+        description: 1=up, 2=down. Em idx1 ativo, idx2/3 administrativamente disabled, idx4 loopback. Do not alarme
+          on idx2/3 without reconfiguring the printer.
+        valuemap:
+          name: Brother IF-MIB state
+      - uuid: 4716bf7d09fe4f33a84e4b73c7857aa8
+        name: 'Interface #{#SNMPINDEX} ({#IFDESCR}): Reported interface speed'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.2.2.1.5.{#SNMPINDEX}
+        key: brother.net.if.speed[{#SNMPINDEX}]
+        delay: 30m
+        history: 14d
+        trends: 365d
+        units: bps
+        description: 'Velocidade IF-MIB ifSpeed: 72 Mbps em idx1/idx3, 100 Mbps em idx2, 0 em loopback. Valor reportado,
+          NAO throughput real nem velocidade de Internet.'
+      - uuid: f56eff1331534dd693e720645a7dc8e2
+        name: 'Interface #{#SNMPINDEX} ({#IFDESCR}): MAC address'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.2.2.1.6.{#SNMPINDEX}
+        key: brother.net.if.mac[{#SNMPINDEX}]
+        delay: 1h
+        history: 14d
+        trends: '0'
+        value_type: CHAR
+        description: ifPhysAddress; valor pode surgir em hexadecimal.
+      - uuid: 94e9bf6058f74a40a1a6e3ad90029838
+        name: 'Interface #{#SNMPINDEX} ({#IFDESCR}): Incoming traffic (bps)'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.2.2.1.10.{#SNMPINDEX}
+        key: brother.net.if.in.bps[{#SNMPINDEX}]
+        delay: 1m
+        history: 14d
+        trends: 365d
+        units: bps
+        description: ifInOctets (Counter32) convertido para bits/s
+        preprocessing:
+        - type: CHANGE_PER_SECOND
+        - type: MULTIPLIER
+          parameters:
+          - '8'
+        value_type: FLOAT
+      - uuid: e2c2aed44ad2497c8aaf818cdc2bdff2
+        name: 'Interface #{#SNMPINDEX} ({#IFDESCR}): Outgoing traffic (bps)'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.2.2.1.16.{#SNMPINDEX}
+        key: brother.net.if.out.bps[{#SNMPINDEX}]
+        delay: 1m
+        history: 14d
+        trends: 365d
+        units: bps
+        description: ifOutOctets (Counter32) convertido para bits/s
+        preprocessing:
+        - type: CHANGE_PER_SECOND
+        - type: MULTIPLIER
+          parameters:
+          - '8'
+        value_type: FLOAT
+      - uuid: 1b1947a9fd7e48d2ab9a0ef75e23566c
+        name: 'Interface #{#SNMPINDEX} ({#IFDESCR}): Incoming errors (per second)'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.2.2.1.14.{#SNMPINDEX}
+        key: brother.net.if.in.err[{#SNMPINDEX}]
+        delay: 1m
+        history: 14d
+        trends: 365d
+        units: pps
+        description: ifInErrors per second
+        preprocessing:
+        - type: CHANGE_PER_SECOND
+        value_type: FLOAT
+      - uuid: c93b40a408464fd29c65b06130507f9b
+        name: 'Interface #{#SNMPINDEX} ({#IFDESCR}): Outgoing errors (per second)'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.2.2.1.20.{#SNMPINDEX}
+        key: brother.net.if.out.err[{#SNMPINDEX}]
+        delay: 1m
+        history: 14d
+        trends: 365d
+        units: pps
+        description: ifOutErrors per second
+        preprocessing:
+        - type: CHANGE_PER_SECOND
+        value_type: FLOAT
+      - uuid: 8e572da3f0e648b1bc7f0ebf1dcb1c9e
+        name: 'Interface #{#SNMPINDEX} ({#IFDESCR}): Incoming discards (per second)'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.2.2.1.13.{#SNMPINDEX}
+        key: brother.net.if.in.disc[{#SNMPINDEX}]
+        delay: 1m
+        history: 14d
+        trends: 365d
+        units: pps
+        description: ifInDiscards per second
+        preprocessing:
+        - type: CHANGE_PER_SECOND
+        value_type: FLOAT
+      - uuid: 8aa3e3a1f5b042ccbac13f5425d28dc0
+        name: 'Interface #{#SNMPINDEX} ({#IFDESCR}): Outgoing discards (per second)'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.2.2.1.19.{#SNMPINDEX}
+        key: brother.net.if.out.disc[{#SNMPINDEX}]
+        delay: 1m
+        history: 14d
+        trends: 365d
+        units: pps
+        description: ifOutDiscards per second
+        preprocessing:
+        - type: CHANGE_PER_SECOND
+        value_type: FLOAT
+      - uuid: 6510da4ac03d4e0eb12e53ee8bdc2423
+        name: 'Interface #{#SNMPINDEX} ({#IFDESCR}): Incoming packets (pps)'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.2.2.1.11.{#SNMPINDEX}
+        key: brother.net.if.packets.in[{#SNMPINDEX}]
+        delay: 1m
+        history: 14d
+        trends: 365d
+        value_type: FLOAT
+        units: pps
+        description: Taxa de pacotes unicast IF-MIB (counter 32bits)
+        preprocessing:
+        - type: CHANGE_PER_SECOND
+      - uuid: e6504fcc8f144ada960998ab1553fab3
+        name: 'Interface #{#SNMPINDEX} ({#IFDESCR}): Outgoing packets (pps)'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.2.2.1.17.{#SNMPINDEX}
+        key: brother.net.if.packets.out[{#SNMPINDEX}]
+        delay: 1m
+        history: 14d
+        trends: 365d
+        value_type: FLOAT
+        units: pps
+        description: Taxa de pacotes unicast IF-MIB (counter 32bits)
+        preprocessing:
+        - type: CHANGE_PER_SECOND
+      trigger_prototypes:
+      - uuid: 25c6d47b77254c40af261f019589c0ff
+        name: 'Interface #{#SNMPINDEX} ({#IFDESCR}): link down (opt-in)'
+        expression: '{$BROTHER.IF.LINK.ALERT}=1 and last(/Brother DCP-9020CDW by SNMP/brother.net.if.admin[{#SNMPINDEX}])=1
+          and min(/Brother DCP-9020CDW by SNMP/brother.net.if.oper[{#SNMPINDEX}],5m)=2'
+        priority: WARNING
+        description: Opcional, ativado pela macro {$BROTHER.IF.LINK.ALERT}=1 apenas quando utilizador decidir monitorizar
+          actively monitor this interface. No estado atual idx2 e idx3 estao disabled por configuration. Atenção que
+          a total Wi-Fi failure can prevent SNMP access; also use ICMP.
+      - uuid: d1129ef80b554d429e994b16080e2fbd
+        name: 'Interface #{#SNMPINDEX} ({#IFDESCR}): high network error rate'
+        expression: avg(/Brother DCP-9020CDW by SNMP/brother.net.if.in.err[{#SNMPINDEX}],10m)>{$BROTHER.IF.ERROR.RATE}
+          or avg(/Brother DCP-9020CDW by SNMP/brother.net.if.out.err[{#SNMPINDEX}],10m)>{$BROTHER.IF.ERROR.RATE}
+        priority: WARNING
+        description: Media de erros de rede per second nos ultimos 10 minutos; limite configuravel. Sem alarmes
+          quando zero.
+      graph_prototypes:
+      - uuid: 6aa6c8975ebc45ff8066d4b1efcfe628
+        name: 'Interface #{#SNMPINDEX} ({#IFDESCR}): traffic (bps)'
+        graph_items:
+        - color: 0088CC
+          item:
+            host: Brother DCP-9020CDW by SNMP
+            key: brother.net.if.in.bps[{#SNMPINDEX}]
+        - color: CC8800
+          item:
+            host: Brother DCP-9020CDW by SNMP
+            key: brother.net.if.out.bps[{#SNMPINDEX}]
+      - uuid: 7b2953af9364485f8d38a59482abff0f
+        name: 'Interface #{#SNMPINDEX} ({#IFDESCR}): erros per second'
+        graph_items:
+        - color: CC2222
+          item:
+            host: Brother DCP-9020CDW by SNMP
+            key: brother.net.if.in.err[{#SNMPINDEX}]
+        - color: CC9900
+          item:
+            host: Brother DCP-9020CDW by SNMP
+            key: brother.net.if.out.err[{#SNMPINDEX}]
+      - uuid: 92485389f2b44a79aaf4af953add8211
+        name: 'Interface #{#SNMPINDEX} ({#IFDESCR}): pacotes unicast (pps)'
+        graph_items:
+        - color: 00AABB
+          item:
+            host: Brother DCP-9020CDW by SNMP
+            key: brother.net.if.packets.in[{#SNMPINDEX}]
+        - color: AA00BB
+          item:
+            host: Brother DCP-9020CDW by SNMP
+            key: brother.net.if.packets.out[{#SNMPINDEX}]
+    macros:
+    - macro: '{$BROTHER.CRIT}'
+      value: '10'
+    - macro: '{$BROTHER.CRIT.RECOVERY}'
+      value: '12'
+    - macro: '{$BROTHER.WARN}'
+      value: '20'
+    - macro: '{$BROTHER.WARN.RECOVERY}'
+      value: '22'
+    - macro: '{$BROTHER.IF.LINK.ALERT}'
+      value: '0'
+    - macro: '{$BROTHER.IF.ERROR.RATE}'
+      value: '1'
+    - macro: '{$BROTHER.PING.LOSS.WARN}'
+      value: '20'
+    - macro: '{$BROTHER.PING.RTT.WARN}'
+      value: '0.15'
+    valuemaps:
+    - uuid: 2a3c4915559549858609e39ab9c7c09e
+      name: Brother IF-MIB state
+      mappings:
+      - value: '1'
+        newvalue: Up
+      - value: '2'
+        newvalue: Down
+      - value: '3'
+        newvalue: Testing
+      - value: '4'
+        newvalue: Unknown
+      - value: '5'
+        newvalue: Dormant
+      - value: '6'
+        newvalue: Not present
+      - value: '7'
+        newvalue: Lower layer down
+    - uuid: d49a062f367b4b32a6996aedb6a2af94
+      name: Brother IF-MIB admin state
+      mappings:
+      - value: '1'
+        newvalue: Enabled
+      - value: '2'
+        newvalue: Disabled
+      - value: '3'
+        newvalue: Testing
+    tags:
+    - tag: class
+      value: hardware
+    - tag: target
+      value: printer
+    - tag: vendor
+      value: Brother
+  triggers:
+  - uuid: a9067d83e0724f788397b06ec1f82136
+    expression: last(/Brother DCP-9020CDW by SNMP/brother.supply.pct[6])<{$BROTHER.CRIT} and last(/Brother DCP-9020CDW
+      by SNMP/brother.supply.pct[6])>=0
+    name: Belt unit - remaining life below 10%
+    priority: WARNING
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: last(/Brother DCP-9020CDW by SNMP/brother.supply.pct[6])>{$BROTHER.CRIT.RECOVERY}
+    tags:
+    - tag: component
+      value: supplies
+  - uuid: a9c81057fd9143efa78e25fdf378f411
+    expression: last(/Brother DCP-9020CDW by SNMP/brother.supply.pct[6])<{$BROTHER.WARN} and last(/Brother DCP-9020CDW
+      by SNMP/brother.supply.pct[6])>={$BROTHER.CRIT}
+    name: Belt unit - remaining life below 20%
+    priority: INFO
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: (last(/Brother DCP-9020CDW by SNMP/brother.supply.pct[6])>{$BROTHER.WARN.RECOVERY} or last(/Brother
+      DCP-9020CDW by SNMP/brother.supply.pct[6])<{$BROTHER.CRIT})
+    tags:
+    - tag: component
+      value: supplies
+  - uuid: 3e62309917554650a06399def95e0434
+    expression: last(/Brother DCP-9020CDW by SNMP/brother.supply.pct[7])<{$BROTHER.CRIT} and last(/Brother DCP-9020CDW
+      by SNMP/brother.supply.pct[7])>=0
+    name: Black drum - remaining life below 10%
+    priority: WARNING
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: last(/Brother DCP-9020CDW by SNMP/brother.supply.pct[7])>{$BROTHER.CRIT.RECOVERY}
+    tags:
+    - tag: component
+      value: supplies
+  - uuid: a5546bd84f9b4cca97eec83c5d8894bf
+    expression: last(/Brother DCP-9020CDW by SNMP/brother.supply.pct[7])<{$BROTHER.WARN} and last(/Brother DCP-9020CDW
+      by SNMP/brother.supply.pct[7])>={$BROTHER.CRIT}
+    name: Black drum - remaining life below 20%
+    priority: INFO
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: (last(/Brother DCP-9020CDW by SNMP/brother.supply.pct[7])>{$BROTHER.WARN.RECOVERY} or last(/Brother
+      DCP-9020CDW by SNMP/brother.supply.pct[7])<{$BROTHER.CRIT})
+    tags:
+    - tag: component
+      value: supplies
+  - uuid: 6327cbc58e6a4bd19314b8605b1dd71c
+    expression: last(/Brother DCP-9020CDW by SNMP/brother.supply.pct[8])<{$BROTHER.CRIT} and last(/Brother DCP-9020CDW
+      by SNMP/brother.supply.pct[8])>=0
+    name: Cyan drum - remaining life below 10%
+    priority: WARNING
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: last(/Brother DCP-9020CDW by SNMP/brother.supply.pct[8])>{$BROTHER.CRIT.RECOVERY}
+    tags:
+    - tag: component
+      value: supplies
+  - uuid: 9b991f47e63c49f1b06e97fa43309cc2
+    expression: last(/Brother DCP-9020CDW by SNMP/brother.supply.pct[8])<{$BROTHER.WARN} and last(/Brother DCP-9020CDW
+      by SNMP/brother.supply.pct[8])>={$BROTHER.CRIT}
+    name: Cyan drum - remaining life below 20%
+    priority: INFO
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: (last(/Brother DCP-9020CDW by SNMP/brother.supply.pct[8])>{$BROTHER.WARN.RECOVERY} or last(/Brother
+      DCP-9020CDW by SNMP/brother.supply.pct[8])<{$BROTHER.CRIT})
+    tags:
+    - tag: component
+      value: supplies
+  - uuid: acf9a32cf4bc4fd291701f12226351b3
+    expression: last(/Brother DCP-9020CDW by SNMP/brother.supply.pct[9])<{$BROTHER.CRIT} and last(/Brother DCP-9020CDW
+      by SNMP/brother.supply.pct[9])>=0
+    name: Magenta drum - remaining life below 10%
+    priority: WARNING
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: last(/Brother DCP-9020CDW by SNMP/brother.supply.pct[9])>{$BROTHER.CRIT.RECOVERY}
+    tags:
+    - tag: component
+      value: supplies
+  - uuid: ab80263f710447e4aa3472e4d640dd14
+    expression: last(/Brother DCP-9020CDW by SNMP/brother.supply.pct[9])<{$BROTHER.WARN} and last(/Brother DCP-9020CDW
+      by SNMP/brother.supply.pct[9])>={$BROTHER.CRIT}
+    name: Magenta drum - remaining life below 20%
+    priority: INFO
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: (last(/Brother DCP-9020CDW by SNMP/brother.supply.pct[9])>{$BROTHER.WARN.RECOVERY} or last(/Brother
+      DCP-9020CDW by SNMP/brother.supply.pct[9])<{$BROTHER.CRIT})
+    tags:
+    - tag: component
+      value: supplies
+  - uuid: 379703fbb5aa4f27b74fe94dae47c0dd
+    expression: last(/Brother DCP-9020CDW by SNMP/brother.supply.pct[10])<{$BROTHER.CRIT} and last(/Brother DCP-9020CDW
+      by SNMP/brother.supply.pct[10])>=0
+    name: Yellow drum - remaining life below 10%
+    priority: WARNING
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: last(/Brother DCP-9020CDW by SNMP/brother.supply.pct[10])>{$BROTHER.CRIT.RECOVERY}
+    tags:
+    - tag: component
+      value: supplies
+  - uuid: 4522de51d0104364bc924ca5f63f8f65
+    expression: last(/Brother DCP-9020CDW by SNMP/brother.supply.pct[10])<{$BROTHER.WARN} and last(/Brother DCP-9020CDW
+      by SNMP/brother.supply.pct[10])>={$BROTHER.CRIT}
+    name: Yellow drum - remaining life below 20%
+    priority: INFO
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: (last(/Brother DCP-9020CDW by SNMP/brother.supply.pct[10])>{$BROTHER.WARN.RECOVERY} or
+      last(/Brother DCP-9020CDW by SNMP/brother.supply.pct[10])<{$BROTHER.CRIT})
+    tags:
+    - tag: component
+      value: supplies
+  - uuid: c13690e6ece8497cbfd0838d8fee6445
+    expression: last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[black])<{$BROTHER.CRIT}
+    name: Black toner - below 10%
+    priority: WARNING
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[black])>{$BROTHER.CRIT.RECOVERY}
+    tags:
+    - tag: component
+      value: supplies
+  - uuid: 07f86f0759d54403b11e34b680ba6f6d
+    expression: last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[black])<{$BROTHER.WARN} and last(/Brother DCP-9020CDW
+      by SNMP/brother.toner.pct[black])>={$BROTHER.CRIT}
+    name: Black toner - below 20%
+    priority: INFO
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: (last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[black])>{$BROTHER.WARN.RECOVERY} or
+      last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[black])<{$BROTHER.CRIT})
+    tags:
+    - tag: component
+      value: supplies
+  - uuid: 4d83d32abf3645a282255eb967a167b2
+    expression: last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[cyan])<{$BROTHER.CRIT}
+    name: Cyan toner - below 10%
+    priority: WARNING
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[cyan])>{$BROTHER.CRIT.RECOVERY}
+    tags:
+    - tag: component
+      value: supplies
+  - uuid: 23f0a0a2976d4958af3651218d530671
+    expression: last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[cyan])<{$BROTHER.WARN} and last(/Brother DCP-9020CDW
+      by SNMP/brother.toner.pct[cyan])>={$BROTHER.CRIT}
+    name: Cyan toner - below 20%
+    priority: INFO
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: (last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[cyan])>{$BROTHER.WARN.RECOVERY} or
+      last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[cyan])<{$BROTHER.CRIT})
+    tags:
+    - tag: component
+      value: supplies
+  - uuid: f0392475f1fd49e59ab91d3637cc0c14
+    expression: last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[magenta])<{$BROTHER.CRIT}
+    name: Magenta toner - below 10%
+    priority: WARNING
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[magenta])>{$BROTHER.CRIT.RECOVERY}
+    tags:
+    - tag: component
+      value: supplies
+  - uuid: da0370a18d5649d5830ae24af87075c5
+    expression: last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[magenta])<{$BROTHER.WARN} and last(/Brother
+      DCP-9020CDW by SNMP/brother.toner.pct[magenta])>={$BROTHER.CRIT}
+    name: Magenta toner - below 20%
+    priority: INFO
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: (last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[magenta])>{$BROTHER.WARN.RECOVERY}
+      or last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[magenta])<{$BROTHER.CRIT})
+    tags:
+    - tag: component
+      value: supplies
+  - uuid: a3d165e6ae2d4d45a6211013a2c114d8
+    expression: last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[yellow])<{$BROTHER.CRIT}
+    name: Yellow toner - below 10%
+    priority: WARNING
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[yellow])>{$BROTHER.CRIT.RECOVERY}
+    tags:
+    - tag: component
+      value: supplies
+  - uuid: b3d5fbb5cef04123bb678d565248626e
+    expression: last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[yellow])<{$BROTHER.WARN} and last(/Brother
+      DCP-9020CDW by SNMP/brother.toner.pct[yellow])>={$BROTHER.CRIT}
+    name: Yellow toner - below 20%
+    priority: INFO
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: (last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[yellow])>{$BROTHER.WARN.RECOVERY}
+      or last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[yellow])<{$BROTHER.CRIT})
+    tags:
+    - tag: component
+      value: supplies
+  - uuid: f51fae3474824235ab7ee37c4bac0133
+    expression: max(/Brother DCP-9020CDW by SNMP/icmpping,5m)=0
+    name: 'Brother: Printer unreachable for 5 minutes'
+    priority: HIGH
+    tags:
+    - tag: component
+      value: printer
+  - uuid: aea676c1a68546f488a777e559a2fec5
+    expression: min(/Brother DCP-9020CDW by SNMP/zabbix[host,snmp,available],10m)=0
+    name: 'Brother: SNMP unavailable for 10 minutes'
+    priority: WARNING
+    tags:
+    - tag: component
+      value: network
+  - uuid: c4392cade95d4e9db93fead0563d8452
+    expression: last(/Brother DCP-9020CDW by SNMP/brother.device.status)=5
+    name: 'Brother: Internal device failure'
+    priority: AVERAGE
+    description: hrDeviceStatus = down. Sem alarme durante standby (running = 2).
+    tags:
+    - tag: component
+      value: printer
+  - uuid: 27d6a8302bb246a192a932eca28bdffb
+    expression: last(/Brother DCP-9020CDW by SNMP/brother.device.status)=3
+    name: 'Brother: Internal device warning'
+    priority: AVERAGE
+    description: hrDeviceStatus warning; verificar papel/tampa pela descricao
+    tags:
+    - tag: component
+      value: printer
+  - uuid: 9a8d1495e09241eb89065bc5dc2e5b33
+    name: 'Brother: ICMP packet loss above 20% (5m)'
+    expression: min(/Brother DCP-9020CDW by SNMP/icmppingloss,5m)>{$BROTHER.PING.LOSS.WARN}
+    priority: WARNING
+    description: Zabbix tem de conseguir pingar a impressora. O estado de sleep pode influenciar a resposta ICMP.
+    tags:
+    - tag: component
+      value: network
+  - uuid: 1a577a03ccaf4475b7403b5d597899d2
+    name: 'Brother: High ICMP latency (5m)'
+    expression: min(/Brother DCP-9020CDW by SNMP/icmppingsec,5m)>{$BROTHER.PING.RTT.WARN}
+    priority: INFO
+    description: Limite de 150 ms por defeito, ajustar para LAN/WLAN e comportamento em sleep.
+    tags:
+    - tag: component
+      value: network
+  - uuid: 5464ed42f0384ed7a9742fdb8f9a0175
+    expression: (last(/Brother DCP-9020CDW by SNMP/brother.alert.code)=8 or bitand(last(/Brother DCP-9020CDW by
+      SNMP/brother.printer.error.flags),32)<>0)
+    name: 'Brother: Paper jam'
+    priority: AVERAGE
+    description: prtAlertCode=8 (jam) ou hrPrinterDetectedErrorState bit 5 (jammed).
+    tags:
+    - tag: component
+      value: printer
+  - uuid: 9fd73dd085694d42a6086561d2d3cc07
+    expression: (last(/Brother DCP-9020CDW by SNMP/brother.alert.code)=808 or bitand(last(/Brother DCP-9020CDW by
+      SNMP/brother.printer.error.flags),2)<>0 or bitand(last(/Brother DCP-9020CDW by SNMP/brother.printer.error.flags),8192)<>0)
+    name: 'Brother: Paper tray empty'
+    priority: AVERAGE
+    description: prtAlertCode=808 (inputMediaSupplyEmpty), bit 1 (noPaper) ou 13 (inputTrayEmpty). Um nivel -3 not
+      significa bandeja vazia.
+    tags:
+    - tag: component
+      value: printer
+  - uuid: 0f3b2fdbd7df4a0294a29e7873b1b52f
+    expression: (last(/Brother DCP-9020CDW by SNMP/brother.alert.code)=3 or last(/Brother DCP-9020CDW by SNMP/brother.alert.code)=501
+      or bitand(last(/Brother DCP-9020CDW by SNMP/brother.printer.error.flags),16)<>0)
+    name: 'Brother: Cover or door open'
+    priority: AVERAGE
+    description: prtAlertCode=3/501 ou hrPrinterDetectedErrorState bit 4 (doorOpen).
+    tags:
+    - tag: component
+      value: printer
+  - uuid: e27939e1f144438e831405a74bdfd79d
+    expression: (bitand(last(/Brother DCP-9020CDW by SNMP/brother.printer.error.flags),128)<>0 or last(/Brother
+      DCP-9020CDW by SNMP/brother.alert.code)=29 or last(/Brother DCP-9020CDW by SNMP/brother.alert.code)=30)
+    name: 'Brother: Service required'
+    priority: AVERAGE
+    description: Bit HR serviceRequested ou Printer-MIB alerta de avaria de subunidade.
+    tags:
+    - tag: component
+      value: printer
+  graphs:
+  - uuid: 66a3f0bf3f744d31a62cb85f14bb69b0
+    name: Belt unit - remaining life
+    graph_items:
+    - color: 00A86B
+      item:
+        host: Brother DCP-9020CDW by SNMP
+        key: brother.supply.pct[6]
+  - uuid: 34ef8fb8ca4e4c199551354e7bccf775
+    name: Black drum - remaining life
+    graph_items:
+    - color: 00A86B
+      item:
+        host: Brother DCP-9020CDW by SNMP
+        key: brother.supply.pct[7]
+  - uuid: f6e408ff20cc470a8b0e839bb90c68ab
+    name: Cyan drum - remaining life
+    graph_items:
+    - color: 00A86B
+      item:
+        host: Brother DCP-9020CDW by SNMP
+        key: brother.supply.pct[8]
+  - uuid: c69f3514293247678727bbc80ae80dc7
+    name: Magenta drum - remaining life
+    graph_items:
+    - color: 00A86B
+      item:
+        host: Brother DCP-9020CDW by SNMP
+        key: brother.supply.pct[9]
+  - uuid: 7c9d0b0e16bb42febcb2ee271e55a8b1
+    name: Yellow drum - remaining life
+    graph_items:
+    - color: 00A86B
+      item:
+        host: Brother DCP-9020CDW by SNMP
+        key: brother.supply.pct[10]
+  - uuid: 8245f7b680e643c08506b4571506f363
+    name: Black toner - nivel (%)
+    graph_items:
+    - color: 2365C8
+      item:
+        host: Brother DCP-9020CDW by SNMP
+        key: brother.toner.pct[black]
+  - uuid: 70a7356063f245a5856dc965a879a22d
+    name: Cyan toner - nivel (%)
+    graph_items:
+    - color: 2365C8
+      item:
+        host: Brother DCP-9020CDW by SNMP
+        key: brother.toner.pct[cyan]
+  - uuid: b105217e573d4e7c8ab7cab61b67fc03
+    name: Magenta toner - nivel (%)
+    graph_items:
+    - color: 2365C8
+      item:
+        host: Brother DCP-9020CDW by SNMP
+        key: brother.toner.pct[magenta]
+  - uuid: d7ef8710931544268ca54b7e81dac76f
+    name: Yellow toner - nivel (%)
+    graph_items:
+    - color: 2365C8
+      item:
+        host: Brother DCP-9020CDW by SNMP
+        key: brother.toner.pct[yellow]
+  - uuid: bef466c0a16b4b89858a5c93b433e2c7
+    name: Rede - perda de pacotes (%)
+    graph_items:
+    - color: CC0000
+      item:
+        host: Brother DCP-9020CDW by SNMP
+        key: icmppingloss
+  - uuid: f7969255dcac4c69be4c58412d9a42e9
+    name: Rede - latencia ICMP (s)
+    graph_items:
+    - color: 0066CC
+      item:
+        host: Brother DCP-9020CDW by SNMP
+        key: icmppingsec
