@@ -2,7 +2,7 @@
 
 **Community Zabbix 7.0 template for the Brother DCP-9020CDW color laser multifunction printer.** Monitor CMYK toner levels, drum and belt lifetime, printed pages, printer errors, input tray, SNMP availability and Ethernet/Wi-Fi network traffic.
 
-**[Download Brother DCP-9020CDW Zabbix YAML template](7.0/template_brother_dcp9020cdw.yaml)** · [SNMP OID reference](OIDS.md) · [All Kernovix Zabbix templates](../../../../README.md)
+**[Download Brother DCP-9020CDW Zabbix YAML template](7.0/template_brother_dcp9020cdw.yaml)** · [SNMP OID reference](OIDS.md) · [All Kernovix Zabbix templates](../../../README.md)
 
 > **Status: community-developed / live Zabbix import pending.** Based on actual SNMP walk results from a Brother DCP-9020CDW with NC-8100w firmware 1.16. Not an official Brother or Zabbix template. Validate the import, preprocessing and alert behavior in your instance before depending on notifications.
 
@@ -100,7 +100,7 @@ Warnings on non-numeric supply values (`-2`, `-3`) must not be treated as zero t
 
 **Paper or cover alert seems incorrect.** Printer errors can be vendor/firmware-specific. Report a sanitized sample of the actual error OID while the fault is present.
 
-See [OIDS.md](OIDS.md) for the full list of known OIDs and [the repository home](../../../../README.md) for other Zabbix templates.
+See [OIDS.md](OIDS.md) for the full list of known OIDs and [the repository home](../../../README.md) for other Zabbix templates.
 
 ## Frequently asked questions (FAQ)
 
@@ -133,4 +133,4 @@ Compatibility has not been validated on other models. SNMP table indexes, privat
 - [IF-MIB (RFC 2863)](https://www.rfc-editor.org/rfc/rfc2863)
 - [Host Resources MIB (RFC 2790)](https://www.rfc-editor.org/rfc/rfc2790)
 
-Community-maintained under the [MIT license](../../../../LICENSE). Contributions and reproducible bug reports are welcome via [GitHub issues](https://github.com/Kernovix/zabbix_templates/issues).
+Community-maintained under the [MIT license](../../../LICENSE). Contributions and reproducible bug reports are welcome via [GitHub issues](https://github.com/Kernovix/zabbix_templates/issues).
