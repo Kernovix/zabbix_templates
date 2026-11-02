@@ -1,0 +1,659 @@
+
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 21db7e8d8a1e46908d1f41897b82caaa
+      name: 'Templates/Network devices'
+  templates:
+    - uuid: 19787e546e14493ea5b1145e12706a79
+      template: 'TP-Link Deco by local API'
+      name: 'TP-Link Deco by local API'
+      description: |
+        Monitor TP-Link Deco mesh systems through the local management API.
+
+        This template authenticates to the local web interface, then collects controller CPU and
+        memory, mesh-node inventory/status and online-client totals. No SNMP, CWMP, agent,
+        Home Assistant or external script is required.
+
+        Apply this template to ONE Deco only: the primary/master Deco. Do not apply it to every
+        mesh node, because every assignment creates an independent authenticated API session.
+        The collection interval and alert confirmation periods are deliberately conservative: this
+        firmware may intermittently return an API timeout while the mesh itself is healthy.
+
+        Requirement: Zabbix 7.0 or later. The Zabbix server/proxy must be able to reach the
+        Deco HTTPS interface. Set {$DECO.PASSWORD} as a host-level secret macro after linking.
+      groups:
+        - name: 'Templates/Network devices'
+      items:
+        - uuid: e90ed11e84394deaaec2d63d96a922e2
+          name: 'Deco API compact source data'
+          type: SCRIPT
+          key: tplink.deco.api.raw
+          delay: '{$DECO.API.INTERVAL}'
+          history: 1d
+          trends: '0'
+          value_type: TEXT
+          timeout: 60s
+          params: |
+            /*
+             * TP-Link Deco local API collector
+             *
+             * The Deco UI publishes the same client-side cryptography used below. Loading it
+             * from the device keeps this item compatible with the installed Deco firmware and
+             * avoids an external program or a Home Assistant instance.
+             */
+            var params = JSON.parse(value);
+            var root = params.scheme + '://' + params.host;
+            var password = params.password;
+            var request = new HttpRequest();
+            var navigator = {appName: 'Netscape'};
+            var window = this;
+            var jQuery = {};
+            var $ = jQuery;
+
+            if (!password) {
+                throw 'Set the host macro {$DECO.PASSWORD}.';
+            }
+
+            $.extend = function (target) {
+                var index, source, key;
+                for (index = 1; index < arguments.length; index++) {
+                    source = arguments[index];
+                    for (key in source) {
+                        if (source.hasOwnProperty(key)) {
+                            target[key] = source[key];
+                        }
+                    }
+                }
+                return target;
+            };
+
+            function statusOk(context) {
+                if (request.getStatus() !== 200) {
+                    throw context + ': HTTP ' + request.getStatus();
+                }
+            }
+
+            function getHeader(headers, wanted) {
+                var key;
+                for (key in headers) {
+                    if (headers.hasOwnProperty(key) && key.toLowerCase() === wanted) {
+                        return headers[key];
+                    }
+                }
+                return null;
+            }
+
+            function postJson(url, data, context) {
+                var response;
+                request.clearHeader();
+                request.addHeader('Content-Type: application/json');
+                response = request.post(url, data);
+                statusOk(context);
+                try {
+                    return JSON.parse(response);
+                }
+                catch (error) {
+                    throw context + ': invalid JSON response';
+                }
+            }
+
+            function formEncode(packet) {
+                return 'sign=' + encodeURIComponent(packet.sign) + '&data=' + encodeURIComponent(packet.data);
+            }
+
+            /*
+             * These must be evaluated in the main Script-item scope.  Zabbix uses Duktape;
+             * a variable declared by eval() inside a helper function is discarded when that
+             * function returns, which would leave encrypt.js without CryptoJS.
+             */
+            request.clearHeader();
+            var cryptoJsCode = request.get(root + '/webpages/js/libs/cryptoJS.min.js');
+            statusOk('Download cryptoJS.min.js');
+            eval(cryptoJsCode);
+            request.clearHeader();
+            var encryptCode = request.get(root + '/webpages/js/libs/encrypt.js');
+            statusOk('Download encrypt.js');
+            eval(encryptCode);
+            request.clearHeader();
+            var tpEncryptCode = request.get(root + '/webpages/js/libs/tpEncrypt.js');
+            statusOk('Download tpEncrypt.js');
+            eval(tpEncryptCode);
+
+            var base = root + '/cgi-bin/luci/;stok=';
+            var keys = postJson(base + '/login?form=keys', JSON.stringify({operation: 'read'}), 'Get password key');
+            if (!keys.result || !keys.result.password) {
+                throw 'The Deco did not return a password key.';
+            }
+
+            var passwordRsa = new $.encrypt.RSA();
+            passwordRsa.setKey(keys.result.password[0], keys.result.password[1]);
+
+            var auth = postJson(base + '/login?form=auth', JSON.stringify({operation: 'read'}), 'Get session key');
+            if (!auth.result || !auth.result.key) {
+                throw 'The Deco did not return a session key.';
+            }
+
+            var crypt = new $.encrypt.encryptor();
+            crypt.setRSAKey(auth.result.key[0], auth.result.key[1]);
+            crypt.setSeq(auth.result.seq);
+            crypt.genAESKey();
+            crypt.setHash('admin', password);
+
+            var loginBody = formEncode(crypt.AesEncrypt(JSON.stringify({
+                operation: 'login',
+                params: {password: passwordRsa.encrypt(password)}
+            }), true));
+            var login = postJson(base + '/login?form=login', loginBody, 'Login');
+            if (!login.data) {
+                throw 'The Deco did not return login data.';
+            }
+
+            var loginData = JSON.parse(crypt.AesDecrypt(login.data));
+            var stok = loginData.stok || (loginData.result && loginData.result.stok);
+            if (!stok) {
+                throw 'The Deco did not return a session token.';
+            }
+
+            var setCookie = getHeader(request.getHeaders(), 'set-cookie');
+            if (!setCookie) {
+                throw 'The Deco did not return a session cookie.';
+            }
+            request.addHeader('Cookie: ' + String(setCookie).split(';')[0]);
+
+            function encryptedRead(path, payload, context) {
+                var response, wrapper, clear, decoded, errorCode;
+                response = request.post(base + stok + path, formEncode(crypt.AesEncrypt(JSON.stringify(payload))));
+                statusOk(context);
+                try {
+                    wrapper = JSON.parse(response);
+                    clear = crypt.AesDecrypt(wrapper.data);
+                    decoded = JSON.parse(clear);
+                }
+                catch (error) {
+                    throw context + ': invalid encrypted response';
+                }
+                errorCode = decoded.error_code || decoded.errorcode;
+                if (decoded.success === false || errorCode) {
+                    throw context + ': Deco API error ' + (errorCode || 'unspecified');
+                }
+                return decoded;
+            }
+
+            function logout() {
+                try {
+                    request.post(base + stok + '/admin/system?form=logout', formEncode(crypt.AesEncrypt(JSON.stringify({operation: 'logout'}))));
+                }
+                catch (ignore) {
+                    /* The collection result is more important than a best-effort session cleanup. */
+                }
+            }
+
+            try {
+                var performance = encryptedRead('/admin/network?form=performance', {operation: 'read'}, 'Read performance').result || {};
+                var devices = encryptedRead('/admin/device?form=device_list', {operation: 'read'}, 'Read Deco list').result || {};
+                var clients = encryptedRead('/admin/client?form=client_list', {
+                    operation: 'read',
+                    params: {device_mac: 'default'}
+                }, 'Read client list').result || {};
+
+                var sourceDeviceList = devices.device_list || [];
+                var deviceList = [];
+                var clientList = clients.client_list || [];
+                var onlineClients = 0;
+                var onlineDecos = 0;
+                var i, sourceNode, online, signal;
+
+                for (i = 0; i < sourceDeviceList.length; i++) {
+                    sourceNode = sourceDeviceList[i];
+                    online = sourceNode.inet_status === 'online' ? 1 : 0;
+                    signal = sourceNode.signal_level || {};
+                    deviceList.push({
+                        mac: sourceNode.mac,
+                        lld_name: sourceNode.nickname || sourceNode.custom_nickname || sourceNode.mac,
+                        lld_online: online,
+                        inet_status: online ? 'online' : 'offline',
+                        device_model: sourceNode.device_model || 'Unknown',
+                        software_ver: sourceNode.software_ver || 'Unknown',
+                        role: sourceNode.role || 'Unknown',
+                        device_ip: sourceNode.device_ip || '',
+                        connection_type: (sourceNode.connection_type || []).join(', '),
+                        signal_2g: Number(signal.band2_4 || 0),
+                        signal_5g: Number(signal.band5 || 0),
+                        backhaul_speed: Number(sourceNode.backhual_speed || sourceNode.backhaul_speed || 0)
+                    });
+                    if (online === 1) {
+                        onlineDecos++;
+                    }
+                }
+                for (i = 0; i < clientList.length; i++) {
+                    if (clientList[i].online) {
+                        onlineClients++;
+                    }
+                }
+
+                return JSON.stringify({
+                    performance: performance,
+                    devices: deviceList,
+                    device_count: deviceList.length,
+                    deco_online_count: onlineDecos,
+                    client_online_count: onlineClients
+                });
+            }
+            finally {
+                /* End only the short-lived session created by this item. */
+                logout();
+            }
+          parameters:
+            - name: host
+              value: '{HOST.CONN}'
+            - name: password
+              value: '{$DECO.PASSWORD}'
+            - name: scheme
+              value: '{$DECO.SCHEME}'
+          tags:
+            - tag: component
+              value: raw
+          triggers:
+            - uuid: 9cc7466c5da145ab8c4f57cac27cbd39
+              expression: 'nodata(/TP-Link Deco by local API/tplink.deco.api.raw,{$DECO.API.NODATA})=1'
+              name: '{HOST.NAME}: Deco API has no data for {$DECO.API.NODATA}'
+              priority: HIGH
+              description: 'The local Deco API has not returned a successful collection. A single failure or timeout does not open this problem; check the password, HTTPS and Zabbix server/proxy connectivity only if the problem persists.'
+              manual_close: 'YES'
+        - uuid: 1fd8e2b8ec7c43f0a40c8a07e8e7bba4
+          name: 'CPU utilization'
+          type: DEPENDENT
+          key: tplink.deco.cpu.util
+          history: 7d
+          value_type: FLOAT
+          units: '%'
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - 'return Number(JSON.parse(value).performance.cpu_usage) * 100;'
+          master_item:
+            key: tplink.deco.api.raw
+          tags:
+            - tag: component
+              value: cpu
+          triggers:
+            - uuid: c8e6b84beb1743f8a72d04cfad7c4486
+              expression: 'min(/TP-Link Deco by local API/tplink.deco.cpu.util,#3)>{$DECO.CPU.WARN}'
+              name: '{HOST.NAME}: high Deco CPU utilization'
+              opdata: 'Current: {ITEM.LASTVALUE1}'
+              priority: WARNING
+              manual_close: 'YES'
+        - uuid: 9cab6ad6100147bc9eeb829164305315
+          name: 'Memory utilization'
+          type: DEPENDENT
+          key: tplink.deco.memory.util
+          history: 7d
+          value_type: FLOAT
+          units: '%'
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - 'return Number(JSON.parse(value).performance.mem_usage) * 100;'
+          master_item:
+            key: tplink.deco.api.raw
+          tags:
+            - tag: component
+              value: memory
+          triggers:
+            - uuid: b4f7943ed4c644c3a1da8ce7cc059887
+              expression: 'min(/TP-Link Deco by local API/tplink.deco.memory.util,#3)>{$DECO.MEMORY.WARN}'
+              name: '{HOST.NAME}: high Deco memory utilization'
+              opdata: 'Current: {ITEM.LASTVALUE1}'
+              priority: WARNING
+              manual_close: 'YES'
+        - uuid: 76121a30fe4746e194c50d1b743513bb
+          name: 'Mesh node count'
+          type: DEPENDENT
+          key: tplink.deco.nodes.count
+          history: 7d
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.device_count
+          master_item:
+            key: tplink.deco.api.raw
+          tags:
+            - tag: component
+              value: mesh
+        - uuid: 1d296a4ba46a4f93bbccef27b2f0f55d
+          name: 'Mesh nodes online'
+          type: DEPENDENT
+          key: tplink.deco.nodes.online
+          history: 7d
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.deco_online_count
+          master_item:
+            key: tplink.deco.api.raw
+          tags:
+            - tag: component
+              value: mesh
+        - uuid: 2de426961bf04d4d8a59a6bf1b5f81c6
+          name: 'Online clients'
+          type: DEPENDENT
+          key: tplink.deco.clients.online
+          history: 7d
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.client_online_count
+          master_item:
+            key: tplink.deco.api.raw
+          tags:
+            - tag: component
+              value: clients
+      discovery_rules:
+        - uuid: 43d6c71a253c48eda926985fc57108fd
+          name: 'Deco mesh node discovery'
+          type: DEPENDENT
+          key: tplink.deco.node.discovery
+          delay: '0'
+          lifetime: 30d
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - 'return JSON.stringify(JSON.parse(value).devices || []);'
+          master_item:
+            key: tplink.deco.api.raw
+          lld_macro_paths:
+            - lld_macro: '{#DECO.MAC}'
+              path: $.mac
+            - lld_macro: '{#DECO.NAME}'
+              path: $.lld_name
+            - lld_macro: '{#DECO.MODEL}'
+              path: $.device_model
+            - lld_macro: '{#DECO.ROLE}'
+              path: $.role
+          item_prototypes:
+            - uuid: 8ac59b45d6d54f4eb63a1f5c62609913
+              name: 'Deco {#DECO.NAME}: online status'
+              type: DEPENDENT
+              key: 'tplink.deco.node.online[{#DECO.MAC}]'
+              history: 7d
+              value_type: UNSIGNED
+              valuemap:
+                name: 'TP-Link Deco node status'
+              preprocessing:
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      var nodes = JSON.parse(value).devices || [];
+                      for (var i = 0; i < nodes.length; i++) {
+                          if (nodes[i].mac === '{#DECO.MAC}') {
+                              return nodes[i].inet_status === 'online' ? 1 : 0;
+                          }
+                      }
+                      return 0;
+              master_item:
+                key: tplink.deco.api.raw
+              tags:
+                - tag: component
+                  value: mesh
+                - tag: node
+                  value: '{#DECO.NAME}'
+              trigger_prototypes:
+                - uuid: 0f579b8adea94f2da7939af5a74299fc
+                  expression: 'max(/TP-Link Deco by local API/tplink.deco.node.online[{#DECO.MAC}],#2)=0'
+                  name: '{HOST.NAME}: Deco {#DECO.NAME} is offline'
+                  priority: HIGH
+                  manual_close: 'YES'
+            - uuid: f9a64d4f3cf241f99fd6f42e00a81e35
+              name: 'Deco {#DECO.NAME}: model'
+              type: DEPENDENT
+              key: 'tplink.deco.node.model[{#DECO.MAC}]'
+              history: 30d
+              trends: '0'
+              value_type: CHAR
+              preprocessing:
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      var nodes = JSON.parse(value).devices || [];
+                      for (var i = 0; i < nodes.length; i++) {
+                          if (nodes[i].mac === '{#DECO.MAC}') {
+                              return nodes[i].device_model || 'Unknown';
+                          }
+                      }
+                      return 'Unknown';
+              master_item:
+                key: tplink.deco.api.raw
+              tags:
+                - tag: component
+                  value: inventory
+                - tag: node
+                  value: '{#DECO.NAME}'
+            - uuid: d2c24a4d903b4d819fcf812541b6d58b
+              name: 'Deco {#DECO.NAME}: firmware'
+              type: DEPENDENT
+              key: 'tplink.deco.node.firmware[{#DECO.MAC}]'
+              history: 30d
+              trends: '0'
+              value_type: CHAR
+              preprocessing:
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      var nodes = JSON.parse(value).devices || [];
+                      for (var i = 0; i < nodes.length; i++) {
+                          if (nodes[i].mac === '{#DECO.MAC}') {
+                              return nodes[i].software_ver || 'Unknown';
+                          }
+                      }
+                      return 'Unknown';
+              master_item:
+                key: tplink.deco.api.raw
+              tags:
+                - tag: component
+                  value: inventory
+                - tag: node
+                  value: '{#DECO.NAME}'
+            - uuid: 0b892147de5747f8a5a460cc92e3f1af
+              name: 'Deco {#DECO.NAME}: role'
+              type: DEPENDENT
+              key: 'tplink.deco.node.role[{#DECO.MAC}]'
+              history: 30d
+              trends: '0'
+              value_type: CHAR
+              preprocessing:
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      var nodes = JSON.parse(value).devices || [];
+                      for (var i = 0; i < nodes.length; i++) {
+                          if (nodes[i].mac === '{#DECO.MAC}') {
+                              return nodes[i].role || 'Unknown';
+                          }
+                      }
+                      return 'Unknown';
+              master_item:
+                key: tplink.deco.api.raw
+              tags:
+                - tag: component
+                  value: inventory
+                - tag: node
+                  value: '{#DECO.NAME}'
+            - uuid: 1d3e928a2a1d48ecb81d35c1934bed36
+              name: 'Deco {#DECO.NAME}: IP address'
+              type: DEPENDENT
+              key: 'tplink.deco.node.ip[{#DECO.MAC}]'
+              history: 30d
+              trends: '0'
+              value_type: CHAR
+              preprocessing:
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      var nodes = JSON.parse(value).devices || [];
+                      for (var i = 0; i < nodes.length; i++) {
+                          if (nodes[i].mac === '{#DECO.MAC}') {
+                              return nodes[i].device_ip || 'Unknown';
+                          }
+                      }
+                      return 'Unknown';
+              master_item:
+                key: tplink.deco.api.raw
+              tags:
+                - tag: component
+                  value: inventory
+                - tag: node
+                  value: '{#DECO.NAME}'
+            - uuid: 4be9e938014c4c26a6ce607102620aa6
+              name: 'Deco {#DECO.NAME}: connection type'
+              type: DEPENDENT
+              key: 'tplink.deco.node.connection[{#DECO.MAC}]'
+              history: 30d
+              trends: '0'
+              value_type: CHAR
+              preprocessing:
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      var nodes = JSON.parse(value).devices || [];
+                      for (var i = 0; i < nodes.length; i++) {
+                          if (nodes[i].mac === '{#DECO.MAC}') {
+                              return nodes[i].connection_type || 'Unknown';
+                          }
+                      }
+                      return 'Unknown';
+              master_item:
+                key: tplink.deco.api.raw
+              tags:
+                - tag: component
+                  value: mesh
+                - tag: node
+                  value: '{#DECO.NAME}'
+            - uuid: 1edbeafc79fe49a1a6c5b9ccfa1e8a13
+              name: 'Deco {#DECO.NAME}: 2.4 GHz signal level'
+              type: DEPENDENT
+              key: 'tplink.deco.node.signal_2g[{#DECO.MAC}]'
+              history: 7d
+              value_type: UNSIGNED
+              preprocessing:
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      var nodes = JSON.parse(value).devices || [];
+                      for (var i = 0; i < nodes.length; i++) {
+                          if (nodes[i].mac === '{#DECO.MAC}') {
+                              return Number(nodes[i].signal_2g || 0);
+                          }
+                      }
+                      return 0;
+              master_item:
+                key: tplink.deco.api.raw
+              tags:
+                - tag: component
+                  value: signal
+                - tag: node
+                  value: '{#DECO.NAME}'
+            - uuid: 9c3c8c15ed104ee381517c4f572de7e6
+              name: 'Deco {#DECO.NAME}: 5 GHz signal level'
+              type: DEPENDENT
+              key: 'tplink.deco.node.signal_5g[{#DECO.MAC}]'
+              history: 7d
+              value_type: UNSIGNED
+              preprocessing:
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      var nodes = JSON.parse(value).devices || [];
+                      for (var i = 0; i < nodes.length; i++) {
+                          if (nodes[i].mac === '{#DECO.MAC}') {
+                              return Number(nodes[i].signal_5g || 0);
+                          }
+                      }
+                      return 0;
+              master_item:
+                key: tplink.deco.api.raw
+              tags:
+                - tag: component
+                  value: signal
+                - tag: node
+                  value: '{#DECO.NAME}'
+            - uuid: 6d0d9530ed5c4b1582e1ad787d8c6fd0
+              name: 'Deco {#DECO.NAME}: backhaul speed'
+              type: DEPENDENT
+              key: 'tplink.deco.node.backhaul_speed[{#DECO.MAC}]'
+              history: 7d
+              value_type: UNSIGNED
+              units: Mbps
+              preprocessing:
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      var nodes = JSON.parse(value).devices || [];
+                      for (var i = 0; i < nodes.length; i++) {
+                          if (nodes[i].mac === '{#DECO.MAC}') {
+                              return Number(nodes[i].backhaul_speed || 0);
+                          }
+                      }
+                      return 0;
+              master_item:
+                key: tplink.deco.api.raw
+              tags:
+                - tag: component
+                  value: mesh
+                - tag: node
+                  value: '{#DECO.NAME}'
+      macros:
+        - macro: '{$DECO.API.INTERVAL}'
+          value: 15m
+          description: 'Full Deco API collection interval. Do not reduce it: the firmware may limit authenticated sessions.'
+        - macro: '{$DECO.API.NODATA}'
+          value: 1h
+          description: 'Period without a successful collection before the API no-data problem opens. It should span multiple collection intervals.'
+        - macro: '{$DECO.CPU.WARN}'
+          value: '90'
+          description: 'A warning opens only when the last three successful collections all exceed this percentage.'
+        - macro: '{$DECO.MEMORY.WARN}'
+          value: '90'
+          description: 'A warning opens only when the last three successful collections all exceed this percentage.'
+        - macro: '{$DECO.PASSWORD}'
+          value: ''
+          type: SECRET_TEXT
+          description: 'Deco owner password. Set this as a host-level secret macro and keep it confidential.'
+        - macro: '{$DECO.SCHEME}'
+          value: https
+          description: 'Deco management-interface scheme.'
+      valuemaps:
+        - uuid: 3ec714f1c43149bca9f0987508fd3391
+          name: 'TP-Link Deco node status'
+          mappings:
+            - value: '0'
+              newvalue: Offline
+            - value: '1'
+              newvalue: Online
+  graphs:
+    - uuid: 6cdff7b8e9864bb08caec4acfc32d74e
+      name: 'TP-Link Deco: CPU and memory utilization'
+      ymin_type_1: FIXED
+      ymax_type_1: FIXED
+      graph_items:
+        - color: 199C0D
+          item:
+            host: 'TP-Link Deco by local API'
+            key: tplink.deco.cpu.util
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: 'TP-Link Deco by local API'
+            key: tplink.deco.memory.util
+    - uuid: c470c30eebed4629a1112faed1dc5249
+      name: 'TP-Link Deco: mesh nodes and clients'
+      graph_items:
+        - color: 199C0D
+          item:
+            host: 'TP-Link Deco by local API'
+            key: tplink.deco.nodes.online
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: 'TP-Link Deco by local API'
+            key: tplink.deco.clients.online
