@@ -1,0 +1,106 @@
+
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 4a64a0e3e2a347caa39f4b6d8f48a514
+      name: 'Templates/Network devices'
+  templates:
+    - uuid: 991c767f69ac4b1cba79ff91c01d91e7
+      template: 'TP-Link Deco by ICMP and HTTPS'
+      name: 'TP-Link Deco by ICMP and HTTPS'
+      description: |
+        Agentless availability monitoring for TP-Link Deco mesh nodes.
+        Includes ICMP reachability, packet loss, latency and HTTPS management-interface availability.
+        No Deco credentials are stored or required.
+      groups:
+        - name: 'Templates/Network devices'
+      items:
+        - uuid: 8c06e8f7033c4b119b72057cd417884e
+          name: 'ICMP ping'
+          type: SIMPLE
+          key: icmpping
+          delay: 30s
+          history: 7d
+          trends: '0'
+          value_type: UNSIGNED
+          tags:
+            - tag: component
+              value: health
+          triggers:
+            - uuid: c0725af5d3c74b2e9e467164526a12bb
+              expression: 'max(/TP-Link Deco by ICMP and HTTPS/icmpping,#3)=0'
+              name: '{HOST.NAME}: unavailable by ICMP'
+              priority: HIGH
+              description: 'The node did not respond to three consecutive ICMP checks.'
+              manual_close: 'YES'
+        - uuid: 1a991f48b8e54d1795d6bfcfc1a99e22
+          name: 'ICMP loss'
+          type: SIMPLE
+          key: icmppingloss
+          delay: 30s
+          history: 7d
+          trends: 365d
+          value_type: FLOAT
+          units: '%'
+          tags:
+            - tag: component
+              value: network
+          triggers:
+            - uuid: e41dbdd0577d4928aaebd807c171818e
+              expression: 'min(/TP-Link Deco by ICMP and HTTPS/icmppingloss,5m)>{$ICMP.LOSS.WARN}'
+              name: '{HOST.NAME}: high ICMP packet loss'
+              priority: WARNING
+              description: 'ICMP packet loss has remained above the configured threshold for five minutes.'
+              manual_close: 'YES'
+        - uuid: 777413ba12e14a1ab2239129fde59492
+          name: 'ICMP response time'
+          type: SIMPLE
+          key: icmppingsec
+          delay: 30s
+          history: 7d
+          trends: 365d
+          value_type: FLOAT
+          units: s
+          tags:
+            - tag: component
+              value: network
+          triggers:
+            - uuid: ddb8d7fde05b49eea2f8c0f25c989f9b
+              expression: 'avg(/TP-Link Deco by ICMP and HTTPS/icmppingsec,5m)>{$ICMP.RESPONSE.WARN}'
+              name: '{HOST.NAME}: high ICMP response time'
+              priority: WARNING
+              description: 'Average ICMP response time has remained above the configured threshold for five minutes.'
+              manual_close: 'YES'
+        - uuid: a364369dc5e542c18c42496a3dd9c089
+          name: 'HTTPS management interface'
+          type: HTTP_AGENT
+          key: 'tplink.deco.https'
+          delay: 1m
+          history: 7d
+          trends: '0'
+          value_type: TEXT
+          url: 'https://{HOST.CONN}/webpages/index.html'
+          status_codes: '200,301,302,401,403'
+          follow_redirects: 'YES'
+          retrieve_mode: HEADERS
+          request_method: GET
+          verify_peer: 'NO'
+          verify_host: 'NO'
+          timeout: 10s
+          tags:
+            - tag: component
+              value: web
+          triggers:
+            - uuid: 5410a7a09eb94cc2b7d405d379e1693f
+              expression: 'nodata(/TP-Link Deco by ICMP and HTTPS/tplink.deco.https,5m)=1'
+              name: '{HOST.NAME}: HTTPS management interface is unavailable'
+              priority: AVERAGE
+              description: 'No valid HTTPS response has been received during the last five minutes.'
+              manual_close: 'YES'
+      macros:
+        - macro: '{$ICMP.LOSS.WARN}'
+          value: '20'
+          description: 'Packet-loss percentage that raises a warning after five minutes.'
+        - macro: '{$ICMP.RESPONSE.WARN}'
+          value: '0.2'
+          description: 'Average ICMP response-time threshold in seconds that raises a warning after five minutes.'
