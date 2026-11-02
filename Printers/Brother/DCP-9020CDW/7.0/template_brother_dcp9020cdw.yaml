@@ -134,7 +134,7 @@ zabbix_export:
       value_type: CHAR
       trends: '0'
     - uuid: a649264ae46546e38cd932c01a7a6ce2
-      name: Alerta Printer-MIB codigo
+      name: Printer-MIB alert code
       type: SNMP_AGENT
       snmp_oid: 1.3.6.1.2.1.43.18.1.1.7.1.1
       key: brother.alert.code
@@ -143,7 +143,7 @@ zabbix_export:
       trends: 365d
       description: prtAlertCode. The initial SNMP walk returned 0
     - uuid: a7c0dca879394c97b738f426b198ac37
-      name: Alerta Printer-MIB texto
+      name: Printer-MIB alert description
       type: SNMP_AGENT
       snmp_oid: 1.3.6.1.2.1.43.18.1.1.8.1.1
       key: brother.alert.text
@@ -153,14 +153,14 @@ zabbix_export:
       trends: '0'
       description: 'prtAlertDescription. Levantamento: Em espera'
     - uuid: 7208468baa744d6cb1c87eda3f65f335
-      name: Alerta Printer-MIB severidade
+      name: Printer-MIB alert severity
       type: SNMP_AGENT
       snmp_oid: 1.3.6.1.2.1.43.18.1.1.2.1.1
       key: brother.alert.severity
       delay: 1m
       history: 30d
       trends: 365d
-      description: prtAlertSeverityLevel; 1 other, 3 critical, 4 warning; some devices return 0
+      description: prtAlertSeverityLevel: 1 other, 3 critical, 4 warning; some devices return 0
     - uuid: 519dc10bd627423ebf8dfa427d7b3745
       name: Brother private maintenance binary block
       type: SNMP_AGENT
@@ -318,7 +318,7 @@ zabbix_export:
       description: 100 x remaining / max, calculated from verified OIDs
       params: 100*last(//brother.supply.remaining[10])/last(//brother.supply.max[10])
     - uuid: b567cccd4247446a81dd9f0c4c419ad9
-      name: Black toner - nivel Printer-MIB
+      name: Black toner - Printer-MIB level
       type: SNMP_AGENT
       snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.1.1
       key: brother.supply.raw[1]
@@ -329,7 +329,7 @@ zabbix_export:
       description: Values -3 (some remaining) and -2 (unknown) do not represent percentages. Do not trigger percentage alerts
         ate validar OID privado
     - uuid: afe033dbca1d4cac83949b5b2292b6ec
-      name: Cyan toner - nivel Printer-MIB
+      name: Cyan toner - Printer-MIB level
       type: SNMP_AGENT
       snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.1.2
       key: brother.supply.raw[2]
@@ -340,7 +340,7 @@ zabbix_export:
       description: Values -3 (some remaining) and -2 (unknown) do not represent percentages. Do not trigger percentage alerts
         ate validar OID privado
     - uuid: 59477a4900c247b991d4e40372c395da
-      name: Magenta toner - nivel Printer-MIB
+      name: Magenta toner - Printer-MIB level
       type: SNMP_AGENT
       snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.1.3
       key: brother.supply.raw[3]
@@ -351,7 +351,7 @@ zabbix_export:
       description: Values -3 (some remaining) and -2 (unknown) do not represent percentages. Do not trigger percentage alerts
         ate validar OID privado
     - uuid: de2d9dcbf32648bfaeb2dceae34f993b
-      name: Yellow toner - nivel Printer-MIB
+      name: Yellow toner - Printer-MIB level
       type: SNMP_AGENT
       snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.1.4
       key: brother.supply.raw[4]
@@ -373,7 +373,7 @@ zabbix_export:
       description: Values -3 (some remaining) and -2 (unknown) do not represent percentages. Do not trigger percentage alerts
         ate validar OID privado
     - uuid: cca3d79fb22a4d8a86ab76e0e2e4d668
-      name: Black toner - nivel privado (%)
+      name: Black toner - private level (%)
       type: DEPENDENT
       key: brother.toner.pct[black]
       history: 30d
@@ -393,7 +393,7 @@ zabbix_export:
           \ if(v>=0&&v<=100)return v;\n }\n}\nthrow 'O bloco Brother not contem percentagem valida para 81';"
         error_handler: DISCARD_VALUE
     - uuid: d87f2c382d8e4f46a609cbc1d37cd704
-      name: Cyan toner - nivel privado (%)
+      name: Cyan toner - private level (%)
       type: DEPENDENT
       key: brother.toner.pct[cyan]
       history: 30d
@@ -413,7 +413,7 @@ zabbix_export:
           \ if(v>=0&&v<=100)return v;\n }\n}\nthrow 'O bloco Brother not contem percentagem valida para 82';"
         error_handler: DISCARD_VALUE
     - uuid: 9d92602a16354525a291dbe724bd0756
-      name: Magenta toner - nivel privado (%)
+      name: Magenta toner - private level (%)
       type: DEPENDENT
       key: brother.toner.pct[magenta]
       history: 30d
@@ -433,7 +433,7 @@ zabbix_export:
           \ if(v>=0&&v<=100)return v;\n }\n}\nthrow 'O bloco Brother not contem percentagem valida para 83';"
         error_handler: DISCARD_VALUE
     - uuid: e19731053fa14af799bb08f8ec8e6c1f
-      name: Yellow toner - nivel privado (%)
+      name: Yellow toner - private level (%)
       type: DEPENDENT
       key: brother.toner.pct[yellow]
       history: 30d
@@ -453,7 +453,7 @@ zabbix_export:
           \ if(v>=0&&v<=100)return v;\n }\n}\nthrow 'O bloco Brother not contem percentagem valida para 84';"
         error_handler: DISCARD_VALUE
     - uuid: c5807641212947c48900f49b3f8fce14
-      name: 'Rede: perda de pacotes ICMP (%)'
+      name: 'Network: ICMP packet loss (%)'
       type: SIMPLE
       key: icmppingloss
       delay: 1m
@@ -463,14 +463,14 @@ zabbix_export:
       description: ICMP packet loss measured by Zabbix server/proxy, not the printer.
       value_type: FLOAT
     - uuid: 06a5c9d53469499aa4f6d32e59d870c8
-      name: 'Rede: latencia ICMP (s)'
+      name: 'Network: ICMP latency (s)'
       type: SIMPLE
       key: icmppingsec
       delay: 1m
       history: 30d
       trends: 365d
       units: s
-      description: Tempo medio de resposta ICMP; inclui variacoes de Wi-Fi e standby.
+      description: Average ICMP response time; includes Wi-Fi and standby variations.
       value_type: FLOAT
     - uuid: 843a555dcc6b41e594a11c506e69fe11
       name: Printer errors - decoded Host Resources MIB bits
@@ -494,7 +494,7 @@ zabbix_export:
           \ {\n  if ((b[byteIndex] & (128>>bit))!==0) v+=(1<<(byteIndex*8+bit));\n }\n}\nreturn v;"
     discovery_rules:
     - uuid: 69b341d1ffd146a586590ca899deea9b
-      name: Descoberta de consumiveis Printer-MIB
+      name: Printer-MIB supplies discovery
       type: SNMP_AGENT
       snmp_oid: discovery[{#SUPPLYNAME},1.3.6.1.2.1.43.11.1.1.6.1]
       key: brother.supplies.discovery
@@ -520,7 +520,7 @@ zabbix_export:
         trends: 90d
         value_type: FLOAT
     - uuid: b28ee9bc260f4a41af2fcdbcf75e20f5
-      name: Descoberta das network interfaces (IF-MIB, indices 1-4)
+      name: Network interface discovery (IF-MIB, indexes 1-4)
       type: SNMP_AGENT
       snmp_oid: discovery[{#IFDESCR},1.3.6.1.2.1.2.2.1.2]
       key: brother.net.interfaces.discovery
@@ -530,7 +530,7 @@ zabbix_export:
         not usar ifType para discriminar Wi-Fi. Consultar Latest data.
       item_prototypes:
       - uuid: 8bc42fd163c9470b9d745d002d9c79e5
-        name: 'Interface #{#SNMPINDEX} ({#IFDESCR}): Tipo (IANA ifType)'
+        name: 'Interface #{#SNMPINDEX} ({#IFDESCR}): Type (IANA ifType)'
         type: SNMP_AGENT
         snmp_oid: 1.3.6.1.2.1.2.2.1.3.{#SNMPINDEX}
         key: brother.net.if.type[{#SNMPINDEX}]
@@ -592,7 +592,7 @@ zabbix_export:
         history: 14d
         trends: 365d
         units: bps
-        description: ifInOctets (Counter32) convertido para bits/s
+        description: ifInOctets (Counter32) converted to bits/s
         preprocessing:
         - type: CHANGE_PER_SECOND
         - type: MULTIPLIER
@@ -608,7 +608,7 @@ zabbix_export:
         history: 14d
         trends: 365d
         units: bps
-        description: ifOutOctets (Counter32) convertido para bits/s
+        description: ifOutOctets (Counter32) converted to bits/s
         preprocessing:
         - type: CHANGE_PER_SECOND
         - type: MULTIPLIER
@@ -707,7 +707,7 @@ zabbix_export:
         expression: avg(/Brother DCP-9020CDW by SNMP/brother.net.if.in.err[{#SNMPINDEX}],10m)>{$BROTHER.IF.ERROR.RATE}
           or avg(/Brother DCP-9020CDW by SNMP/brother.net.if.out.err[{#SNMPINDEX}],10m)>{$BROTHER.IF.ERROR.RATE}
         priority: WARNING
-        description: Media de erros de rede per second nos ultimos 10 minutos; limite configuravel. Sem alarmes
+        description: Average network errors per second over the past 10 minutes; configurable threshold. No alerts
           quando zero.
       graph_prototypes:
       - uuid: 6aa6c8975ebc45ff8066d4b1efcfe628
@@ -722,7 +722,7 @@ zabbix_export:
             host: Brother DCP-9020CDW by SNMP
             key: brother.net.if.out.bps[{#SNMPINDEX}]
       - uuid: 7b2953af9364485f8d38a59482abff0f
-        name: 'Interface #{#SNMPINDEX} ({#IFDESCR}): erros per second'
+        name: 'Interface #{#SNMPINDEX} ({#IFDESCR}): errors per second'
         graph_items:
         - color: CC2222
           item:
@@ -733,7 +733,7 @@ zabbix_export:
             host: Brother DCP-9020CDW by SNMP
             key: brother.net.if.out.err[{#SNMPINDEX}]
       - uuid: 92485389f2b44a79aaf4af953add8211
-        name: 'Interface #{#SNMPINDEX} ({#IFDESCR}): pacotes unicast (pps)'
+        name: 'Interface #{#SNMPINDEX} ({#IFDESCR}): unicast packets (pps)'
         graph_items:
         - color: 00AABB
           item:
@@ -998,7 +998,7 @@ zabbix_export:
     expression: last(/Brother DCP-9020CDW by SNMP/brother.device.status)=5
     name: 'Brother: Internal device failure'
     priority: AVERAGE
-    description: hrDeviceStatus = down. Sem alarme durante standby (running = 2).
+    description: hrDeviceStatus = down. No alert during standby (running = 2).
     tags:
     - tag: component
       value: printer
@@ -1006,7 +1006,7 @@ zabbix_export:
     expression: last(/Brother DCP-9020CDW by SNMP/brother.device.status)=3
     name: 'Brother: Internal device warning'
     priority: AVERAGE
-    description: hrDeviceStatus warning; verificar papel/tampa pela descricao
+    description: hrDeviceStatus warning; verify paper/cover condition using the description
     tags:
     - tag: component
       value: printer
@@ -1022,7 +1022,7 @@ zabbix_export:
     name: 'Brother: High ICMP latency (5m)'
     expression: min(/Brother DCP-9020CDW by SNMP/icmppingsec,5m)>{$BROTHER.PING.RTT.WARN}
     priority: INFO
-    description: Limite de 150 ms por defeito, ajustar para LAN/WLAN e comportamento em sleep.
+    description: Default threshold is 150 ms; adjust for LAN/WLAN latency and sleep behavior.
     tags:
     - tag: component
       value: network
@@ -1040,7 +1040,7 @@ zabbix_export:
       SNMP/brother.printer.error.flags),2)<>0 or bitand(last(/Brother DCP-9020CDW by SNMP/brother.printer.error.flags),8192)<>0)
     name: 'Brother: Paper tray empty'
     priority: AVERAGE
-    description: prtAlertCode=808 (inputMediaSupplyEmpty), bit 1 (noPaper) ou 13 (inputTrayEmpty). Um nivel -3 not
+    description: prtAlertCode=808 (inputMediaSupplyEmpty), bit 1 (noPaper) ou 13 (inputTrayEmpty). A level of -3 does not
       significa bandeja vazia.
     tags:
     - tag: component
@@ -1128,14 +1128,14 @@ zabbix_export:
         host: Brother DCP-9020CDW by SNMP
         key: brother.toner.pct[yellow]
   - uuid: bef466c0a16b4b89858a5c93b433e2c7
-    name: Rede - perda de pacotes (%)
+    name: Network - packet loss (%)
     graph_items:
     - color: CC0000
       item:
         host: Brother DCP-9020CDW by SNMP
         key: icmppingloss
   - uuid: f7969255dcac4c69be4c58412d9a42e9
-    name: Rede - latencia ICMP (s)
+    name: Network - ICMP latency (s)
     graph_items:
     - color: 0066CC
       item:
