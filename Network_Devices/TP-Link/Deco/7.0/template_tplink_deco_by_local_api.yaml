@@ -236,6 +236,7 @@ zabbix_export:
                     devices: deviceList,
                     device_count: deviceList.length,
                     deco_online_count: onlineDecos,
+                    client_count: clientList.length,
                     client_online_count: onlineClients
                 });
             }
@@ -334,6 +335,20 @@ zabbix_export:
           tags:
             - tag: component
               value: mesh
+        - uuid: 38c5ad87c7f7410fa3528eea2bb1c7df
+          name: 'Connected clients'
+          type: DEPENDENT
+          key: tplink.deco.clients.count
+          history: 7d
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.client_count
+          master_item:
+            key: tplink.deco.api.raw
+          tags:
+            - tag: component
+              value: clients
         - uuid: 2de426961bf04d4d8a59a6bf1b5f81c6
           name: 'Online clients'
           type: DEPENDENT
