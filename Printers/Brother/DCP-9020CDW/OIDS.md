@@ -16,10 +16,9 @@ These OIDs were observed on an NC-8100w firmware 1.16 Brother DCP-9020CDW. Value
 | Supply description | `1.3.6.1.2.1.43.11.1.1.6.1.N` | N=1..10 |
 | Supply maximum | `1.3.6.1.2.1.43.11.1.1.8.1.N` | N=6 belt, N=7..10 drums |
 | Supply current | `1.3.6.1.2.1.43.11.1.1.9.1.N` | N=6 belt, N=7..10 drums |
-| Private maintenance TLV | `1.3.6.1.4.1.2435.2.3.9.4.2.1.5.5.8.0` | CMYK toner tags 0x81..0x84 |
 | Interface description | `1.3.6.1.2.1.2.2.1.2` | Use IF-MIB discovery |
 | Interface operational status | `1.3.6.1.2.1.2.2.1.8.N` | 1 up, 2 down |
 | Interface receive octets | `1.3.6.1.2.1.2.2.1.10.N` | Counter32 |
 | Interface transmit octets | `1.3.6.1.2.1.2.2.1.16.N` | Counter32 |
 
-Caution: toner readings in the generic Printer-MIB are negative status codes, not percentages. Private maintenance values need Zabbix preprocessing validation.
+Caution: toner readings in the generic Printer-MIB are negative status codes, not percentages. The Brother private-maintenance OID is deliberately excluded because it returns a binary OCTET STRING that is unsafe to parse as text with Zabbix preprocessing.

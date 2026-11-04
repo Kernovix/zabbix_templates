@@ -4,13 +4,13 @@
 
 **[Download Brother DCP-9020CDW Zabbix YAML template](7.0/template_brother_dcp9020cdw.yaml)** · [SNMP OID reference](OIDS.md) · [All Kernovix Zabbix templates](../../../README.md)
 
-> **Status: community-developed / live Zabbix import pending.** Based on actual SNMP walk results from a Brother DCP-9020CDW with NC-8100w firmware 1.16. Not an official Brother or Zabbix template. Validate the import, preprocessing and alert behavior in your instance before depending on notifications.
+> **Status: community-developed / live Zabbix import pending.** Based on actual SNMP walk results from a Brother DCP-9020CDW with NC-8100w firmware 1.16. Not an official Brother or Zabbix template. Validate the import and alert behavior in your instance before depending on notifications.
 
 ## Features: toner, drums, pages, printer status and network
 
 | Monitoring area | Included measurements | Notes |
 | --- | --- | --- |
-| Toner cartridges | Black, cyan, magenta, yellow | Brother private maintenance OID; percentages require panel validation |
+| Toner cartridges | Black, cyan, magenta, yellow status | Standard Printer-MIB status values; this model does not expose safe numeric percentages |
 | Drums | Black, cyan, magenta, yellow | Remaining percentage derived from Printer-MIB numeric capacities |
 | Belt | Remaining life percentage | Printer-MIB |
 | Waste toner box | Raw supply state | Numeric remaining percentage not exposed in tested standard MIB |
@@ -54,7 +54,7 @@ The second command lists printer supply descriptions; the third lists IF-MIB int
 
 The device returned ten Printer-MIB supply entries: black/cyan/magenta/yellow toner cartridges, waste toner box, belt unit and four drums.
 
-For the four toner cartridges, `prtMarkerSuppliesLevel` returned **-3** and `prtMarkerSuppliesMaxCapacity` returned **-2**. These indicate nonquantified states, **not percentages**. The template includes Brother's private maintenance OCTET STRING `1.3.6.1.4.1.2435.2.3.9.4.2.1.5.5.8.0` to attempt CMYK percentages. The initial captured TLV sample suggests approximately **50% black and 80% each cyan, magenta and yellow**, but these figures have **not been cross-checked against the printer display**. Zabbix representation of OCTET STRING data must also be checked.
+For the four toner cartridges, `prtMarkerSuppliesLevel` returned **-3** and `prtMarkerSuppliesMaxCapacity` returned **-2**. These indicate nonquantified states, **not percentages**. The template therefore exposes only the standard Printer-MIB values and creates no toner-percentage alerts. A Brother private maintenance OID exists, but it returns a binary OCTET STRING and is intentionally not polled or parsed by this template because it is not safe to process as text in Zabbix preprocessing.
 
 For drums and the belt, the Printer-MIB provided numeric remaining values and maximum capacity. The percentage calculation uses **remaining / maximum × 100**.
 
@@ -94,7 +94,7 @@ Warnings on non-numeric supply values (`-2`, `-3`) must not be treated as zero t
 
 **Supply discovery fails.** Query the standard Printer-MIB supply description column: `1.3.6.1.2.1.43.11.1.1.6`. Review discovery errors and unsupported preprocessing steps.
 
-**Toner percentages look wrong or unsupported.** Inspect the raw private-maintenance item and use Zabbix preprocessing tests to validate binary/hex representation. Confirm the percentage against the printer's web interface before enabling alert actions.
+**Toner values are -2 or -3.** These are valid Brother Printer-MIB status values, not percentages. This template intentionally does not convert them into percentage alerts.
 
 **Some network interfaces show Down.** Compare operational and administrative states before enabling interface-down alerts. A second inactive network interface is not necessarily a fault.
 
@@ -110,7 +110,7 @@ Yes. This repository contains a [Zabbix 7.0 YAML template](7.0/template_brother_
 
 ### Can Zabbix monitor Brother DCP-9020CDW toner levels?
 
-Potentially. On this device, the standard Printer-MIB only reports indeterminate toner states. A Brother-specific maintenance OID appears to expose encoded CMYK levels. Check against the printer's displayed levels before using percentage-based alerts.
+The template monitors the standard Printer-MIB toner status values. This printer does not expose safe, portable numeric toner percentages, so the template intentionally does not derive or alert on percentages.
 
 ### Can Zabbix monitor Brother printer drum and belt life?
 

@@ -160,18 +160,7 @@ zabbix_export:
       delay: 1m
       history: 30d
       trends: 365d
-      description: prtAlertSeverityLevel: 1 other, 3 critical, 4 warning; some devices return 0
-    - uuid: 519dc10bd627423ebf8dfa427d7b3745
-      name: Brother private maintenance binary block
-      type: SNMP_AGENT
-      snmp_oid: 1.3.6.1.4.1.2435.2.3.9.4.2.1.5.5.8.0
-      key: brother.maintenance.raw
-      delay: 5m
-      history: 30d
-      value_type: TEXT
-      trends: '0'
-      description: Brother brInfoMaintenance block; firmware returns a binary OCTET STRING, which may arrive as characters
-        binarios e not hex; confirmar em Latest data antes de ativar itens derivados
+      description: 'prtAlertSeverityLevel: 1 other, 3 critical, 4 warning; some devices return 0'
     - uuid: e6b47b3d62874e3ebe075ba2a738a8d0
       name: Belt unit - capacity
       type: SNMP_AGENT
@@ -326,8 +315,7 @@ zabbix_export:
       history: 30d
       value_type: FLOAT
       trends: 365d
-      description: Values -3 (some remaining) and -2 (unknown) do not represent percentages. Do not trigger percentage alerts
-        ate validar OID privado
+      description: Values -3 (some remaining) and -2 (unknown) do not represent percentages. Do not trigger percentage alerts.
     - uuid: afe033dbca1d4cac83949b5b2292b6ec
       name: Cyan toner - Printer-MIB level
       type: SNMP_AGENT
@@ -337,8 +325,7 @@ zabbix_export:
       history: 30d
       value_type: FLOAT
       trends: 365d
-      description: Values -3 (some remaining) and -2 (unknown) do not represent percentages. Do not trigger percentage alerts
-        ate validar OID privado
+      description: Values -3 (some remaining) and -2 (unknown) do not represent percentages. Do not trigger percentage alerts.
     - uuid: 59477a4900c247b991d4e40372c395da
       name: Magenta toner - Printer-MIB level
       type: SNMP_AGENT
@@ -348,8 +335,7 @@ zabbix_export:
       history: 30d
       value_type: FLOAT
       trends: 365d
-      description: Values -3 (some remaining) and -2 (unknown) do not represent percentages. Do not trigger percentage alerts
-        ate validar OID privado
+      description: Values -3 (some remaining) and -2 (unknown) do not represent percentages. Do not trigger percentage alerts.
     - uuid: de2d9dcbf32648bfaeb2dceae34f993b
       name: Yellow toner - Printer-MIB level
       type: SNMP_AGENT
@@ -359,8 +345,7 @@ zabbix_export:
       history: 30d
       value_type: FLOAT
       trends: 365d
-      description: Values -3 (some remaining) and -2 (unknown) do not represent percentages. Do not trigger percentage alerts
-        ate validar OID privado
+      description: Values -3 (some remaining) and -2 (unknown) do not represent percentages. Do not trigger percentage alerts.
     - uuid: 9cd76112addf41ad91bfb9e56b5ecf96
       name: Waste toner box - Printer-MIB level
       type: SNMP_AGENT
@@ -370,88 +355,7 @@ zabbix_export:
       history: 30d
       value_type: FLOAT
       trends: 365d
-      description: Values -3 (some remaining) and -2 (unknown) do not represent percentages. Do not trigger percentage alerts
-        ate validar OID privado
-    - uuid: cca3d79fb22a4d8a86ab76e0e2e4d668
-      name: Black toner - private level (%)
-      type: DEPENDENT
-      key: brother.toner.pct[black]
-      history: 30d
-      value_type: FLOAT
-      trends: 365d
-      units: '%'
-      description: Brother private TLV field decoding 0x81; validate percentage against the printer panel.
-      master_item:
-        key: brother.maintenance.raw
-      preprocessing:
-      - type: JAVASCRIPT
-        parameters:
-        - "var s=String(value);var b=[];\nif (/^(?:\\s*[0-9A-Fa-f]{2}\\s*)+$/.test(s)) {\n var h=s.match(/[0-9A-Fa-f]{2}/g);for(var\
-          \ z=0;z<h.length;z++) b.push(parseInt(h[z],16));\n} else if (/^Hex-STRING:/i.test(s)) {\n var a=s.slice(11).match(/[0-9A-Fa-f]{2}/g)||[];for(var\
-          \ z=0;z<a.length;z++)b.push(parseInt(a[z],16));\n} else {for(var z=0;z<s.length;z++)b.push(s.charCodeAt(z)&255);}\n\
-          for(var i=0;i+6<b.length;i++){\n if(b[i]===0x81 && b[i+1]===1 && b[i+2]===4){\n var v=(((b[i+3]*256+b[i+4])*256+b[i+5])*256+b[i+6]);\n\
-          \ if(v>=0&&v<=100)return v;\n }\n}\nthrow 'O bloco Brother not contem percentagem valida para 81';"
-        error_handler: DISCARD_VALUE
-    - uuid: d87f2c382d8e4f46a609cbc1d37cd704
-      name: Cyan toner - private level (%)
-      type: DEPENDENT
-      key: brother.toner.pct[cyan]
-      history: 30d
-      value_type: FLOAT
-      trends: 365d
-      units: '%'
-      description: Brother private TLV field decoding 0x82; validate percentage against the printer panel.
-      master_item:
-        key: brother.maintenance.raw
-      preprocessing:
-      - type: JAVASCRIPT
-        parameters:
-        - "var s=String(value);var b=[];\nif (/^(?:\\s*[0-9A-Fa-f]{2}\\s*)+$/.test(s)) {\n var h=s.match(/[0-9A-Fa-f]{2}/g);for(var\
-          \ z=0;z<h.length;z++) b.push(parseInt(h[z],16));\n} else if (/^Hex-STRING:/i.test(s)) {\n var a=s.slice(11).match(/[0-9A-Fa-f]{2}/g)||[];for(var\
-          \ z=0;z<a.length;z++)b.push(parseInt(a[z],16));\n} else {for(var z=0;z<s.length;z++)b.push(s.charCodeAt(z)&255);}\n\
-          for(var i=0;i+6<b.length;i++){\n if(b[i]===0x82 && b[i+1]===1 && b[i+2]===4){\n var v=(((b[i+3]*256+b[i+4])*256+b[i+5])*256+b[i+6]);\n\
-          \ if(v>=0&&v<=100)return v;\n }\n}\nthrow 'O bloco Brother not contem percentagem valida para 82';"
-        error_handler: DISCARD_VALUE
-    - uuid: 9d92602a16354525a291dbe724bd0756
-      name: Magenta toner - private level (%)
-      type: DEPENDENT
-      key: brother.toner.pct[magenta]
-      history: 30d
-      value_type: FLOAT
-      trends: 365d
-      units: '%'
-      description: Brother private TLV field decoding 0x83; validate percentage against the printer panel.
-      master_item:
-        key: brother.maintenance.raw
-      preprocessing:
-      - type: JAVASCRIPT
-        parameters:
-        - "var s=String(value);var b=[];\nif (/^(?:\\s*[0-9A-Fa-f]{2}\\s*)+$/.test(s)) {\n var h=s.match(/[0-9A-Fa-f]{2}/g);for(var\
-          \ z=0;z<h.length;z++) b.push(parseInt(h[z],16));\n} else if (/^Hex-STRING:/i.test(s)) {\n var a=s.slice(11).match(/[0-9A-Fa-f]{2}/g)||[];for(var\
-          \ z=0;z<a.length;z++)b.push(parseInt(a[z],16));\n} else {for(var z=0;z<s.length;z++)b.push(s.charCodeAt(z)&255);}\n\
-          for(var i=0;i+6<b.length;i++){\n if(b[i]===0x83 && b[i+1]===1 && b[i+2]===4){\n var v=(((b[i+3]*256+b[i+4])*256+b[i+5])*256+b[i+6]);\n\
-          \ if(v>=0&&v<=100)return v;\n }\n}\nthrow 'O bloco Brother not contem percentagem valida para 83';"
-        error_handler: DISCARD_VALUE
-    - uuid: e19731053fa14af799bb08f8ec8e6c1f
-      name: Yellow toner - private level (%)
-      type: DEPENDENT
-      key: brother.toner.pct[yellow]
-      history: 30d
-      value_type: FLOAT
-      trends: 365d
-      units: '%'
-      description: Brother private TLV field decoding 0x84; validate percentage against the printer panel.
-      master_item:
-        key: brother.maintenance.raw
-      preprocessing:
-      - type: JAVASCRIPT
-        parameters:
-        - "var s=String(value);var b=[];\nif (/^(?:\\s*[0-9A-Fa-f]{2}\\s*)+$/.test(s)) {\n var h=s.match(/[0-9A-Fa-f]{2}/g);for(var\
-          \ z=0;z<h.length;z++) b.push(parseInt(h[z],16));\n} else if (/^Hex-STRING:/i.test(s)) {\n var a=s.slice(11).match(/[0-9A-Fa-f]{2}/g)||[];for(var\
-          \ z=0;z<a.length;z++)b.push(parseInt(a[z],16));\n} else {for(var z=0;z<s.length;z++)b.push(s.charCodeAt(z)&255);}\n\
-          for(var i=0;i+6<b.length;i++){\n if(b[i]===0x84 && b[i+1]===1 && b[i+2]===4){\n var v=(((b[i+3]*256+b[i+4])*256+b[i+5])*256+b[i+6]);\n\
-          \ if(v>=0&&v<=100)return v;\n }\n}\nthrow 'O bloco Brother not contem percentagem valida para 84';"
-        error_handler: DISCARD_VALUE
+      description: Values -3 (some remaining) and -2 (unknown) do not represent percentages. Do not trigger percentage alerts.
     - uuid: c5807641212947c48900f49b3f8fce14
       name: 'Network: ICMP packet loss (%)'
       type: SIMPLE
@@ -900,86 +804,6 @@ zabbix_export:
     tags:
     - tag: component
       value: supplies
-  - uuid: c13690e6ece8497cbfd0838d8fee6445
-    expression: last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[black])<{$BROTHER.CRIT}
-    name: Black toner - below 10%
-    priority: WARNING
-    recovery_mode: RECOVERY_EXPRESSION
-    recovery_expression: last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[black])>{$BROTHER.CRIT.RECOVERY}
-    tags:
-    - tag: component
-      value: supplies
-  - uuid: 07f86f0759d54403b11e34b680ba6f6d
-    expression: last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[black])<{$BROTHER.WARN} and last(/Brother DCP-9020CDW
-      by SNMP/brother.toner.pct[black])>={$BROTHER.CRIT}
-    name: Black toner - below 20%
-    priority: INFO
-    recovery_mode: RECOVERY_EXPRESSION
-    recovery_expression: (last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[black])>{$BROTHER.WARN.RECOVERY} or
-      last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[black])<{$BROTHER.CRIT})
-    tags:
-    - tag: component
-      value: supplies
-  - uuid: 4d83d32abf3645a282255eb967a167b2
-    expression: last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[cyan])<{$BROTHER.CRIT}
-    name: Cyan toner - below 10%
-    priority: WARNING
-    recovery_mode: RECOVERY_EXPRESSION
-    recovery_expression: last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[cyan])>{$BROTHER.CRIT.RECOVERY}
-    tags:
-    - tag: component
-      value: supplies
-  - uuid: 23f0a0a2976d4958af3651218d530671
-    expression: last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[cyan])<{$BROTHER.WARN} and last(/Brother DCP-9020CDW
-      by SNMP/brother.toner.pct[cyan])>={$BROTHER.CRIT}
-    name: Cyan toner - below 20%
-    priority: INFO
-    recovery_mode: RECOVERY_EXPRESSION
-    recovery_expression: (last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[cyan])>{$BROTHER.WARN.RECOVERY} or
-      last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[cyan])<{$BROTHER.CRIT})
-    tags:
-    - tag: component
-      value: supplies
-  - uuid: f0392475f1fd49e59ab91d3637cc0c14
-    expression: last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[magenta])<{$BROTHER.CRIT}
-    name: Magenta toner - below 10%
-    priority: WARNING
-    recovery_mode: RECOVERY_EXPRESSION
-    recovery_expression: last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[magenta])>{$BROTHER.CRIT.RECOVERY}
-    tags:
-    - tag: component
-      value: supplies
-  - uuid: da0370a18d5649d5830ae24af87075c5
-    expression: last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[magenta])<{$BROTHER.WARN} and last(/Brother
-      DCP-9020CDW by SNMP/brother.toner.pct[magenta])>={$BROTHER.CRIT}
-    name: Magenta toner - below 20%
-    priority: INFO
-    recovery_mode: RECOVERY_EXPRESSION
-    recovery_expression: (last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[magenta])>{$BROTHER.WARN.RECOVERY}
-      or last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[magenta])<{$BROTHER.CRIT})
-    tags:
-    - tag: component
-      value: supplies
-  - uuid: a3d165e6ae2d4d45a6211013a2c114d8
-    expression: last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[yellow])<{$BROTHER.CRIT}
-    name: Yellow toner - below 10%
-    priority: WARNING
-    recovery_mode: RECOVERY_EXPRESSION
-    recovery_expression: last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[yellow])>{$BROTHER.CRIT.RECOVERY}
-    tags:
-    - tag: component
-      value: supplies
-  - uuid: b3d5fbb5cef04123bb678d565248626e
-    expression: last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[yellow])<{$BROTHER.WARN} and last(/Brother
-      DCP-9020CDW by SNMP/brother.toner.pct[yellow])>={$BROTHER.CRIT}
-    name: Yellow toner - below 20%
-    priority: INFO
-    recovery_mode: RECOVERY_EXPRESSION
-    recovery_expression: (last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[yellow])>{$BROTHER.WARN.RECOVERY}
-      or last(/Brother DCP-9020CDW by SNMP/brother.toner.pct[yellow])<{$BROTHER.CRIT})
-    tags:
-    - tag: component
-      value: supplies
   - uuid: f51fae3474824235ab7ee37c4bac0133
     expression: max(/Brother DCP-9020CDW by SNMP/icmpping,5m)=0
     name: 'Brother: Printer unreachable for 5 minutes'
@@ -1099,34 +923,6 @@ zabbix_export:
       item:
         host: Brother DCP-9020CDW by SNMP
         key: brother.supply.pct[10]
-  - uuid: 8245f7b680e643c08506b4571506f363
-    name: Black toner - nivel (%)
-    graph_items:
-    - color: 2365C8
-      item:
-        host: Brother DCP-9020CDW by SNMP
-        key: brother.toner.pct[black]
-  - uuid: 70a7356063f245a5856dc965a879a22d
-    name: Cyan toner - nivel (%)
-    graph_items:
-    - color: 2365C8
-      item:
-        host: Brother DCP-9020CDW by SNMP
-        key: brother.toner.pct[cyan]
-  - uuid: b105217e573d4e7c8ab7cab61b67fc03
-    name: Magenta toner - nivel (%)
-    graph_items:
-    - color: 2365C8
-      item:
-        host: Brother DCP-9020CDW by SNMP
-        key: brother.toner.pct[magenta]
-  - uuid: d7ef8710931544268ca54b7e81dac76f
-    name: Yellow toner - nivel (%)
-    graph_items:
-    - color: 2365C8
-      item:
-        host: Brother DCP-9020CDW by SNMP
-        key: brother.toner.pct[yellow]
   - uuid: bef466c0a16b4b89858a5c93b433e2c7
     name: Network - packet loss (%)
     graph_items:
