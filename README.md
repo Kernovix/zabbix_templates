@@ -2,7 +2,7 @@
 
 Open-source **Zabbix monitoring templates** maintained by [Kernovix](https://github.com/Kernovix). This repository provides importable YAML templates and practical setup documentation for monitoring printers, networking equipment and infrastructure with Zabbix.
 
-Currently available: **Brother DCP-9020CDW SNMP printer monitoring for Zabbix 7.0** and **TP-Link Deco mesh monitoring for Zabbix 7.0**, covering node availability, controller telemetry and mesh-node discovery.
+Currently available: **Brother DCP-9020CDW printer monitoring**, **TP-Link Deco mesh monitoring** and **TrueNAS SCALE SNMP/ZFS ARC-aware monitoring**, all for Zabbix 7.0.
 
 > **Independent community project.** Not affiliated with, sponsored by or endorsed by Zabbix SIA, Brother Industries or TP-Link. Templates are not official Zabbix integrations.
 
@@ -12,6 +12,7 @@ Currently available: **Brother DCP-9020CDW SNMP printer monitoring for Zabbix 7.
 | --- | --- | --- | --- | --- | --- |
 | Printers | **Brother DCP-9020CDW** | SNMPv2c, ICMP | **7.0** | [Brother DCP-9020CDW monitoring guide](Printers/Brother/DCP-9020CDW/README.md) | [Zabbix 7.0 YAML template](Printers/Brother/DCP-9020CDW/7.0/template_brother_dcp9020cdw.yaml) |
 | Network devices | **TP-Link Deco mesh systems** | ICMP, HTTPS, local encrypted API | **7.0** | [TP-Link Deco monitoring guide](Network_Devices/TP-Link/Deco/README.md) | [ICMP/HTTPS YAML](Network_Devices/TP-Link/Deco/7.0/template_tplink_deco_by_icmp_https.yaml) · [local-API YAML](Network_Devices/TP-Link/Deco/7.0/template_tplink_deco_by_local_api.yaml) |
+| Storage devices | **TrueNAS SCALE (ZFS ARC-aware memory)** | SNMP, ICMP | **7.0** | [TrueNAS SCALE monitoring guide](Storage_Devices/TrueNAS/template_truenas_scale_by_snmp/README.md) | [Zabbix 7.0 YAML](Storage_Devices/TrueNAS/template_truenas_scale_by_snmp/7.0/template_truenas_scale_by_snmp.yaml) |
 
 ### Brother DCP-9020CDW — SNMP printer monitoring
 
@@ -34,6 +35,12 @@ The [TP-Link Deco template package](Network_Devices/TP-Link/Deco/README.md) sepa
 
 **Important limitations:** the Deco local API is undocumented and may change between firmware versions. The local-API template requires a host-level Secret text password macro and must be validated on the target controller before alert actions are enabled. See the [Deco validation notes](Network_Devices/TP-Link/Deco/TESTING.md).
 
+### TrueNAS SCALE — ZFS ARC-aware memory monitoring
+
+The [TrueNAS SCALE template](Storage_Devices/TrueNAS/template_truenas_scale_by_snmp/README.md) is a modified derivative of the [tr1plus SNMP project](https://github.com/tr1plus/zabbix_truenas_SCALE_snmp). It adds memory metrics that account for ZFS ARC and revised alerts/graphs, while keeping the original TrueNAS SNMP monitoring. Adjusted readings are estimates and **require live validation**.
+
+**License exception:** this directory follows the original [GNU GPL version 2](Storage_Devices/TrueNAS/template_truenas_scale_by_snmp/LICENSE), **not** the root MIT license. See [source attribution and changes](Storage_Devices/TrueNAS/template_truenas_scale_by_snmp/CHANGELOG.md).
+
 ## Install a Zabbix template
 
 1. Choose a device from the [template catalog](#available-zabbix-templates).
@@ -51,6 +58,7 @@ For the Brother model, follow the full [installation and troubleshooting guide](
 | --- | --- | --- | --- |
 | Brother | DCP-9020CDW | SNMPv2c / Printer-MIB / IF-MIB / ICMP | Community-developed; collected OIDs verified, Zabbix live import pending |
 | TP-Link | Deco mesh systems | ICMP / HTTPS / local encrypted API | Community-developed; controller collection validated on Zabbix 7.0.32; see model/firmware and trigger limitations in the package guide |
+| TrueNAS | SCALE (upstream target 25.10+) | SNMP / ZFS ARC | GPL v2 derivative; static validation passed, modified template live import pending |
 
 This repository is intended to grow with additional Zabbix templates, organized by **category → manufacturer → model → Zabbix version**. Contributions are welcome, but untested templates will be clearly identified.
 
@@ -60,6 +68,8 @@ This repository is intended to grow with additional Zabbix templates, organized 
 - [Brother DCP-9020CDW: verified SNMP OID reference](Printers/Brother/DCP-9020CDW/OIDS.md)
 - [TP-Link Deco: controller and satellite monitoring guide](Network_Devices/TP-Link/Deco/README.md)
 - [TP-Link Deco: validation notes](Network_Devices/TP-Link/Deco/TESTING.md)
+- [TrueNAS SCALE: monitoring guide](Storage_Devices/TrueNAS/template_truenas_scale_by_snmp/README.md)
+- [TrueNAS SCALE: changelog](Storage_Devices/TrueNAS/template_truenas_scale_by_snmp/CHANGELOG.md)
 - [Contributing guidelines](CONTRIBUTING.md)
 - [MIT license](LICENSE)
 

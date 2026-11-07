@@ -47,4 +47,4 @@ zabbix_templates/
 
 This project publishes independent Zabbix monitoring templates. It is not an official Zabbix integration catalog. Avoid claiming support for models or firmware that have not been tested.
 
-All contributions must be compatible with the repository's [MIT license](LICENSE).
+Original Kernovix contributions normally use the repository's [MIT license](LICENSE). **Derivative templates must preserve their source license and attribution**, even when it differs from MIT. The [TrueNAS SCALE derivative](Storage_Devices/TrueNAS/template_truenas_scale_by_snmp/README.md), for example, is distributed under the upstream GNU GPL v2, with its own [LICENSE](Storage_Devices/TrueNAS/template_truenas_scale_by_snmp/LICENSE).
