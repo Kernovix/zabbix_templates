@@ -1,0 +1,200 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+  - uuid: a12ba9a4a18d4f7cbfddfd10dd34cb7c
+    name: Templates/SMLIGHT
+  templates:
+  - uuid: d4303e5d41f2481695ad09bf4e9ee5eb
+    template: SMLIGHT SLZB-MR4U by HTTP
+    name: SMLIGHT SLZB-MR4U by HTTP
+    description: Lightweight SMLIGHT SLZB-MR4U template for Zabbix 7.0, verified against five live /metrics values on 2026-11-12.
+      Uses one HTTP GET every two minutes, with dependent items processed by Zabbix. No agents, TCP scans, discovery,
+      or automated restarts. Does not provide individual radio health metrics.
+    groups:
+    - name: Templates/SMLIGHT
+    items:
+    - uuid: ccfee14e1c82443e9fa98794368a4133
+      name: 'SLZB: raw HTTP metrics'
+      type: HTTP_AGENT
+      key: slzb.metrics.raw
+      delay: 2m
+      history: 1d
+      value_type: TEXT
+      trends: '0'
+      description: One HTTP GET to /metrics every 120 seconds. The other five items are dependent and do not perform extra requests.
+      timeout: 5s
+      url: '{$SLZB.URL}'
+      status_codes: '200'
+      tags:
+      - tag: component
+        value: raw
+    - uuid: 8a2af82ea6d2460f89e21be8d1d739f9
+      name: 'SLZB: active TCP clients'
+      type: DEPENDENT
+      key: slzb.socket.clients
+      delay: '0'
+      history: 30d
+      trends: 365d
+      value_type: UNSIGNED
+      description: Number of TCP clients connected to the coordinator socket services. This is not the number of paired Zigbee devices.
+      preprocessing:
+      - type: REGEX
+        parameters:
+        - (?m)^smlight_socket_clients(?:\{[^}]*\})?[ \t]+(-?[0-9]+(?:\.[0-9]+)?)[ \t]*$
+        - \1
+      master_item:
+        key: slzb.metrics.raw
+      tags:
+      - tag: component
+        value: connectivity
+      triggers:
+      - uuid: a6a4493271c441ebb96a88b4732b8d0b
+        expression: max(/SMLIGHT SLZB-MR4U by HTTP/slzb.socket.clients,10m)=0
+        name: 'SLZB: no TCP clients for 10 minutes'
+        priority: WARNING
+        description: TCP client count remained zero throughout the window. Does not identify which radio or service was affected; check ZHA/Zigbee2MQTT.
+        tags:
+        - tag: scope
+          value: availability
+    - uuid: b4fb858ee338495fa395ba6267e9c69f
+      name: 'SLZB: socket uptime'
+      type: DEPENDENT
+      key: slzb.socket.uptime
+      delay: '0'
+      history: 30d
+      trends: 365d
+      value_type: UNSIGNED
+      units: s
+      description: Socket service uptime reported in seconds.
+      preprocessing:
+      - type: REGEX
+        parameters:
+        - (?m)^smlight_socket_uptime(?:\{[^}]*\})?[ \t]+(-?[0-9]+(?:\.[0-9]+)?)[ \t]*$
+        - \1
+      master_item:
+        key: slzb.metrics.raw
+      tags:
+      - tag: component
+        value: connectivity
+    - uuid: 1d1f4ae6f8cf4352983b661156811ff4
+      name: 'SLZB: device uptime'
+      type: DEPENDENT
+      key: slzb.device.uptime
+      delay: '0'
+      history: 30d
+      trends: 365d
+      value_type: FLOAT
+      units: s
+      description: Firmware reports milliseconds; converted to seconds using a 0.001 multiplier.
+      preprocessing:
+      - type: REGEX
+        parameters:
+        - (?m)^smlight_device_uptime(?:\{[^}]*\})?[ \t]+(-?[0-9]+(?:\.[0-9]+)?)[ \t]*$
+        - \1
+      - type: MULTIPLIER
+        parameters:
+        - '0.001'
+      master_item:
+        key: slzb.metrics.raw
+      tags:
+      - tag: component
+        value: system
+      triggers:
+      - uuid: 7ce51c4daefc491cb820f62f0ed164ad
+        expression: change(/SMLIGHT SLZB-MR4U by HTTP/slzb.device.uptime)<0
+        name: 'SLZB: device restarted'
+        priority: INFO
+        description: Core uptime decreased between readings, suggesting a restart. The trigger clears on a subsequent normal reading; no automatic action.
+        tags:
+        - tag: scope
+          value: health
+    - uuid: 07398133d40a47dd8edf652b46730ce2
+      name: 'SLZB: device temperature'
+      type: DEPENDENT
+      key: slzb.device.temperature
+      delay: '0'
+      history: 30d
+      trends: 365d
+      value_type: FLOAT
+      units: °C
+      description: Internal temperature reported by SLZB-OS, in degrees Celsius.
+      preprocessing:
+      - type: REGEX
+        parameters:
+        - (?m)^smlight_device_temp(?:\{[^}]*\})?[ \t]+(-?[0-9]+(?:\.[0-9]+)?)[ \t]*$
+        - \1
+      master_item:
+        key: slzb.metrics.raw
+      tags:
+      - tag: component
+        value: health
+      triggers:
+      - uuid: a58719ce62c049cc921fc083b6f7193a
+        expression: nodata(/SMLIGHT SLZB-MR4U by HTTP/slzb.device.temperature,12m)=1
+        name: 'SLZB: no metrics for 12 minutes'
+        priority: HIGH
+        description: No temperature metric for at least 12 minutes, due to an unavailable /metrics endpoint or a response missing this metric.
+        tags:
+        - tag: scope
+          value: availability
+      - uuid: 99422971e05047f480145608fa356813
+        expression: min(/SMLIGHT SLZB-MR4U by HTTP/slzb.device.temperature,10m)>{$SLZB.TEMP.WARN}
+        name: 'SLZB: high internal temperature for 10 minutes'
+        priority: WARNING
+        description: Temperature remained above the configured threshold for 10 minutes. The default of 70 °C is adjustable, not an official vendor limit.
+        tags:
+        - tag: scope
+          value: health
+    - uuid: 190cf8770d1b435f8293824d70ca8208
+      name: 'SLZB: free heap (native value)'
+      type: DEPENDENT
+      key: slzb.device.heap_free
+      delay: '0'
+      history: 30d
+      trends: 365d
+      value_type: UNSIGNED
+      description: Native free-heap value reported by firmware. Units have not been confirmed; no automatic threshold is applied.
+      preprocessing:
+      - type: REGEX
+        parameters:
+        - (?m)^smlight_free_heap(?:\{[^}]*\})?[ \t]+(-?[0-9]+(?:\.[0-9]+)?)[ \t]*$
+        - \1
+      master_item:
+        key: slzb.metrics.raw
+      tags:
+      - tag: component
+        value: memory
+    tags:
+    - tag: class
+      value: network
+    - tag: target
+      value: zigbee-coordinator
+    macros:
+    - macro: '{$SLZB.URL}'
+      value: http://SLZB_IP_ADDRESS/metrics
+      description: Device /metrics URL. Override this macro on each monitored host with its actual address.
+    - macro: '{$SLZB.TEMP.WARN}'
+      value: '70'
+      description: Temperature threshold in Celsius for the sustained 10-minute warning.
+  graphs:
+  - uuid: a37463ab949044039aae3eb46a044f30
+    name: 'SLZB: internal temperature'
+    graph_items:
+    - color: D35400
+      item:
+        host: SMLIGHT SLZB-MR4U by HTTP
+        key: slzb.device.temperature
+  - uuid: 24c33fc9f531437693af468cfab6b58b
+    name: 'SLZB: active TCP clients'
+    graph_items:
+    - color: 1A7C11
+      item:
+        host: SMLIGHT SLZB-MR4U by HTTP
+        key: slzb.socket.clients
+  - uuid: b54c79209410412d85bbff0ea5088141
+    name: 'SLZB: free heap (native value)'
+    graph_items:
+    - color: 0088CC
+      item:
+        host: SMLIGHT SLZB-MR4U by HTTP
+        key: slzb.device.heap_free
